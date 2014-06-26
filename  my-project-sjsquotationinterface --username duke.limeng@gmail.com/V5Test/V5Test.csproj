@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Simulator\mdgw_20140618.rar" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Samples\cashauctionparams_20140618.xml">
