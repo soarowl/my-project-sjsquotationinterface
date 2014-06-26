@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Log4cb>
+  
+  <!--
+    日志文件的记录级别，可能的级别有如下几种：
+      - Debug（10）     ： 调试级别
+      - Info（30）      ： 信息级别
+      - Warning（50）   ： 警告级别
+      - Error（70）     ： 错误级别
+      在记录日志时，如果所记录的日志信息级别低于此处配置的级别，则对应的日志信息将不会被记录到日志中。
+  -->
+  <LogLevel Level="Debug" Description="日志级别，默认为：Info" />
+
+  <!-- 日志文件的路径，可以是相对路径，也可以是绝对路径。 -->
+  <LogPath Path="log" Description="默认路径为：./log" />
+
+  <!-- 用于控制显示到日志ListView的日志级别，仅当设置了ListView时有效 -->
+  <LogConsole Level="Debug" Description="显示到Console的日志级别，默认为：Info" />
+
+  <!-- 用于控制执行自定义日志处理回调函数的日志级别 -->
+  <LogCallback Level="Debug" Description="执行日志回调处理函数的日志级别，默认为：Debug" />
+
+  <!--
+    日志文件的最大值，在日志文件到达该大小时，将会自动创建新文件。
+      格式为：[文件大小][单位后缀],
+              - 可能的后缀有：KB, MB 或者是 GB
+  -->
+  <MaxFileSize MaxSize="5MB" Description="日志文件最大值，默认为：50M" />
+
+  <!--
+    System.Text.GetEncodings()中合法的编码器。
+    常用有：
+      GB2312/GBK、Uncodie、UTF-8等
+  -->
+  <LogEncoding Encoding="GB2312" Description="编码方式，默认为：GB2312" />
+
+  <!--
+    DisplayAndLogFile : 显示到Console并记录的日志
+    DisplayOnly       : 只显示到Console的日志
+    LogFileOnly       : 只记录的日志
+  -->
+  <LogType Type="DisplayAndLogFile" Description="日志类型，默认为：LogFileOnly" />
+
+  <!--ConsoleColor
+  {
+    Black = 0,        //黑色
+    DarkBlue = 1,     //暗蓝色
+    DarkGreen = 2,    //暗绿色
+    DarkCyan = 3,     //暗蓝绿色
+    DarkRed = 4,      //暗红色
+    DarkMagenta = 5,  //暗紫红色
+    DarkYellow = 6,   //暗黄色
+    Gray = 7,         //灰色
+    DarkGray = 8,     //暗灰色
+    Blue = 9,         //蓝色
+    Green = 10,       //绿色
+    Cyan = 11,        //蓝绿色
+    Red = 12,         //红色
+    Magenta = 13,     //紫红色
+    Yellow = 14,      //黄色
+    White = 15,       //白色
+  }-->
+  <ConsoleColor Description="仅当LogType为DisplayAndLogFile或DisplayOnly时有效" >
+    <Color Level="Debug"    BackgroundColor="Black" ForegroundColor="Gray" />
+    <Color Level="Info"     BackgroundColor="Black" ForegroundColor="DarkGreen" />
+    <Color Level="Warning"  BackgroundColor="Yellow" ForegroundColor="Magenta" />
+    <Color Level="Error"    BackgroundColor="Yellow" ForegroundColor="Red" />
+  </ConsoleColor>
+</Log4cb>

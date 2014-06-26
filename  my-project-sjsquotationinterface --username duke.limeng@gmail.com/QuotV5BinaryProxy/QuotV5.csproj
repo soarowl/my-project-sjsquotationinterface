@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3450FD40-CA8A-49C2-AEBB-2877CF2E2593}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>QuotV5</RootNamespace>
+    <AssemblyName>QuotV5</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Log4cb, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31987554334705a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\Log4cb.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceManager, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31987554334705a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\ServiceManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Binary\MsgDefinations\IMarketData.cs" />
+    <Compile Include="Binary\MsgDefinations\QuotSnap.cs" />
+    <Compile Include="Binary\MsgDefinations\Order.cs" />
+    <Compile Include="StaticInfo\Definations\DerivativeAuctionParams.cs" />
+    <Compile Include="StaticInfo\Parsers\CashAuctionParamsParser.cs" />
+    <Compile Include="StaticInfo\Parsers\DerivativeAuctionParamsParser.cs" />
+    <Compile Include="StaticInfo\Parsers\ParserBase.cs" />
+    <Compile Include="Utils\BigEndianStructHelper.cs" />
+    <Compile Include="Binary\BinaryQuotProxy.cs" />
+    <Compile Include="Binary\BinaryQuotProxyConfig.cs" />
+    <Compile Include="Binary\Connection.cs" />
+    <Compile Include="Utils\DynamicMethodExecutor.cs" />
+    <Compile Include="Binary\MessageHelper.cs" />
+    <Compile Include="Binary\MsgDefinations\Bullet.cs" />
+    <Compile Include="Binary\MsgDefinations\ChannelHeartbeat.cs" />
+    <Compile Include="Binary\MsgDefinations\Heartbeat.cs" />
+    <Compile Include="Binary\MsgDefinations\IMessage.cs" />
+    <Compile Include="Binary\MsgDefinations\Logon.cs" />
+    <Compile Include="Binary\MsgDefinations\Logout.cs" />
+    <Compile Include="Binary\MsgDefinations\MDEntryType.cs" />
+    <Compile Include="Binary\MsgDefinations\MessagePack.cs" />
+    <Compile Include="Binary\MsgDefinations\MsgConsts.cs" />
+    <Compile Include="Binary\MsgDefinations\MsgType.cs" />
+    <Compile Include="Binary\MsgDefinations\SecuritySwitchType.cs" />
+    <Compile Include="Utils\DataHelper.cs" />
+    <Compile Include="Utils\FastReflection.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Binary\MsgDefinations\RealtimeStatus.cs" />
+    <Compile Include="Binary\MsgDefinations\Resend.cs" />
+    <Compile Include="Binary\MsgDefinations\SessionStatus.cs" />
+    <Compile Include="Binary\MsgDefinations\StandardHeader.cs" />
+    <Compile Include="Binary\MsgDefinations\Trailer.cs" />
+    <Compile Include="StaticInfo\Definations\AfterhoursParams.cs" />
+    <Compile Include="StaticInfo\Definations\CashAuctionParams.cs" />
+    <Compile Include="StaticInfo\Definations\BondDistributionParams.cs" />
+    <Compile Include="StaticInfo\Definations\CallOrPut.cs" />
+    <Compile Include="StaticInfo\Definations\Securities\CommonSecurityInfo.cs" />
+    <Compile Include="StaticInfo\Definations\EVoteParams.cs" />
+    <Compile Include="StaticInfo\Definations\ExerciseType.cs" />
+    <Compile Include="StaticInfo\Definations\IndexInfo.cs" />
+    <Compile Include="StaticInfo\Definations\IssueParams.cs" />
+    <Compile Include="StaticInfo\Definations\NegotiationParams.cs" />
+    <Compile Include="StaticInfo\Definations\RateType.cs" />
+    <Compile Include="StaticInfo\Definations\RightsIssueParams.cs" />
+    <Compile Include="StaticInfo\Parsers\SecurityInfoParser.cs" />
+    <Compile Include="StaticInfo\Definations\SecurityCloseMD.cs" />
+    <Compile Include="StaticInfo\Definations\SecurityLending.cs" />
+    <Compile Include="StaticInfo\Definations\Securities\SecurityParams.cs" />
+    <Compile Include="StaticInfo\Definations\SecurityStatus.cs" />
+    <Compile Include="StaticInfo\Definations\SecurityType.cs" />
+    <Compile Include="StaticInfo\Definations\Stat.cs" />
+    <Compile Include="StaticInfo\Definations\Securities\SecurityInfos.cs" />
+    <Compile Include="StaticInfo\Definations\WarrantClearingType.cs" />
+    <Compile Include="Utils\ObjectCreator.cs" />
+    <Compile Include="Utils\TObj.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Libs\Log4cb.dll" />
+    <Content Include="Libs\ServiceHost.dll" />
+    <Content Include="Libs\ServiceManager.dll" />
+    <Content Include="Log4cbConfig.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
