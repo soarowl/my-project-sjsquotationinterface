@@ -8,6 +8,7 @@ namespace QuotV5.StaticInfo
     /// <summary>
     /// 集中竞价交易类业务参考信息
     /// </summary>
+   [XmlParseInfo("AuctionParams", "Security")]
     public class CashAuctionParams
     {
         /// <summary>
@@ -61,6 +62,7 @@ namespace QuotV5.StaticInfo
         /// <summary>
         /// 竞价限价参数
         /// </summary>
+        [XmlParseInfo("PriceLimitSetting", "Setting")]
         public List<PriceLimitSetting> PriceLimitSetting { get; set; }
 
         /// <summary>

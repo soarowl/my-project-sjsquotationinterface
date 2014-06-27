@@ -5,6 +5,7 @@ using System.Text;
 
 namespace QuotV5.StaticInfo
 {
+    [XmlParseInfo("AuctionParams", "Security")]
     public class DerivativeAuctionParams
     {
         /// <summary>

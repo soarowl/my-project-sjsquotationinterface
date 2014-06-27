@@ -64,13 +64,19 @@
     <None Include="Simulator\mdgw_20140618.rar" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Samples\cashauctionparams_20140618.xml">
+    <Content Include="Samples\cashauctionparams_20140121.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Samples\derivativeauctionparams_20140618.xml">
+    <Content Include="Samples\derivativeauctionparams_20140121.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Samples\securities_20140618.xml">
+    <Content Include="Samples\indexinfo_20140121.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\negotiationparams_20140121.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\securities_20140121.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

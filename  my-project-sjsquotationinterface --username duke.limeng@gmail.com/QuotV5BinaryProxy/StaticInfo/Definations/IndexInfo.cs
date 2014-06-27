@@ -8,7 +8,8 @@ namespace QuotV5.StaticInfo
     /// <summary>
     /// 指数信息
     /// </summary>
-    class IndexInfo
+    [XmlParseInfo("Securities","Security")]
+    public class IndexInfo
     {
         /// <summary>
         /// 证券代码
@@ -40,7 +41,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N18(5)
         /// </remarks>
-        public decimal PrevClosePx { get; set; }
+        public decimal PreCloseIdx { get; set; }
 
     }
 }

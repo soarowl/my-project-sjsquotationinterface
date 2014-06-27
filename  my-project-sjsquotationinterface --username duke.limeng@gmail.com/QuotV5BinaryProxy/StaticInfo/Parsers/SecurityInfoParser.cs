@@ -31,7 +31,7 @@ namespace QuotV5.StaticInfo
             }
         }
 
-        private  SecurityInfoBase Parse(XElement securityInfoNode)
+        private  SecurityInfoBase Parse(XContainer securityInfoNode)
         {
             SecurityInfoBase rtn = null;
             CommonSecurityInfo commonInfo = ParseNode<CommonSecurityInfo>(securityInfoNode);
@@ -107,29 +107,5 @@ namespace QuotV5.StaticInfo
             return rtn;
         }
 
-        protected override bool ParseSpecialPropery<T>(T obj, System.Reflection.PropertyInfo property, XElement node)
-        {
-            if (property.PropertyType == typeof(List<SecurityStatus>))
-            {
-                var securityStatusRootNode = node.Descendants("SecurityStatus").FirstOrDefault();
-                if (securityStatusRootNode != null)
-                {
-                    List<SecurityStatus> securityStatus = new List<SecurityStatus>();
-                    foreach (var statusNode in securityStatusRootNode.Descendants("Status"))
-                    {
-                        string valueStr = ReadValueStr(statusNode, "Status");
-                        int value = DataHelper.TryParseInt32(valueStr);
-                        SecurityStatus status = (SecurityStatus)value;
-                        securityStatus.Add(status);
-                    }
-                    FastReflection<T>.SetPropertyValue<List<SecurityStatus>>(obj, property, securityStatus);
-                }
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
     }
 }

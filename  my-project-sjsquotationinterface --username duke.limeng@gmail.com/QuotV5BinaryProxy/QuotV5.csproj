@@ -52,8 +52,11 @@
     <Compile Include="Binary\MsgDefinations\QuotSnap.cs" />
     <Compile Include="Binary\MsgDefinations\Order.cs" />
     <Compile Include="StaticInfo\Definations\DerivativeAuctionParams.cs" />
+    <Compile Include="StaticInfo\Definations\Securities.cs" />
     <Compile Include="StaticInfo\Parsers\CashAuctionParamsParser.cs" />
     <Compile Include="StaticInfo\Parsers\DerivativeAuctionParamsParser.cs" />
+    <Compile Include="StaticInfo\Parsers\IndexInfoParser.cs" />
+    <Compile Include="StaticInfo\Parsers\NegotiationParamsParser.cs" />
     <Compile Include="StaticInfo\Parsers\ParserBase.cs" />
     <Compile Include="Utils\BigEndianStructHelper.cs" />
     <Compile Include="Binary\BinaryQuotProxy.cs" />
@@ -84,7 +87,6 @@
     <Compile Include="StaticInfo\Definations\CashAuctionParams.cs" />
     <Compile Include="StaticInfo\Definations\BondDistributionParams.cs" />
     <Compile Include="StaticInfo\Definations\CallOrPut.cs" />
-    <Compile Include="StaticInfo\Definations\Securities\CommonSecurityInfo.cs" />
     <Compile Include="StaticInfo\Definations\EVoteParams.cs" />
     <Compile Include="StaticInfo\Definations\ExerciseType.cs" />
     <Compile Include="StaticInfo\Definations\IndexInfo.cs" />
@@ -95,14 +97,11 @@
     <Compile Include="StaticInfo\Parsers\SecurityInfoParser.cs" />
     <Compile Include="StaticInfo\Definations\SecurityCloseMD.cs" />
     <Compile Include="StaticInfo\Definations\SecurityLending.cs" />
-    <Compile Include="StaticInfo\Definations\Securities\SecurityParams.cs" />
     <Compile Include="StaticInfo\Definations\SecurityStatus.cs" />
     <Compile Include="StaticInfo\Definations\SecurityType.cs" />
     <Compile Include="StaticInfo\Definations\Stat.cs" />
-    <Compile Include="StaticInfo\Definations\Securities\SecurityInfos.cs" />
     <Compile Include="StaticInfo\Definations\WarrantClearingType.cs" />
     <Compile Include="Utils\ObjectCreator.cs" />
-    <Compile Include="Utils\TObj.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libs\Log4cb.dll" />

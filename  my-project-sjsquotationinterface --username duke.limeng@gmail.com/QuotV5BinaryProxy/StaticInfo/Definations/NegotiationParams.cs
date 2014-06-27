@@ -8,7 +8,8 @@ namespace QuotV5.StaticInfo
     /// <summary>
     /// 协议交易业务参考信息
     /// </summary>
-    class NegotiationParams
+   [XmlParseInfo("AuctionParams", "Security")]
+    public class NegotiationParams
     {
         /// <summary>
         /// 证券代码
