@@ -8,6 +8,12 @@ using System.Collections;
 
 namespace QuotV5.StaticInfo
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// 性能有损失，但是调用不频繁的话，就无所谓了
+    /// </remarks>
     public abstract class ParserBase
     {
 
