@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{35823DDD-BAA7-49A1-A5AB-5C104FEA97D3}</ProjectGuid>
+    <ProjectGuid>{862E550C-13E2-4E2C-811F-888D109B009F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>V5Test</RootNamespace>
-    <AssemblyName>V5Test</AssemblyName>
+    <RootNamespace>MDServer</RootNamespace>
+    <AssemblyName>MDServer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -35,14 +35,19 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CodeTimer">
-      <HintPath>D:\Work\3rd libs\CodeTimer\CodeTimer.dll</HintPath>
-    </Reference>
     <Reference Include="Log4cb">
-      <HintPath>..\QuotV5BinaryProxy\Libs\Log4cb.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\Log4cb.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceHost">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceHost.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceManager">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,35 +55,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Application.cs" />
+    <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="Program.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QuotV5BinaryProxy\QuotV5Proxy.csproj">
-      <Project>{3450FD40-CA8A-49C2-AEBB-2877CF2E2593}</Project>
-      <Name>QuotV5Proxy</Name>
-    </ProjectReference>
+    <Content Include="MDServerConfig.Template.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Simulator\mdgw_20140618.rar" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Samples\cashauctionparams_20140121.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\derivativeauctionparams_20140121.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\indexinfo_20140121.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\negotiationparams_20140121.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\securities_20140121.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

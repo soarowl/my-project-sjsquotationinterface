@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration Version="1.0" Namespace="MDServer.Config">
+
+	<!-- 数据库连接 -->
+	<!-- DBConnection Type="Oracle" MaxCount="$DB_MAXCOUNT$" Host="$MSSQL_HOST$" Port="$DB_PORT$" Service="$DB_SERVICE$" User="$DB_USER$" Password="$DB_PASSWORD$" Database="" / -->
+	<!-- DBConnection Type="MSSQLSERVER" MaxCount="$DB_MAXCOUNT$" Host="$MSSQL_HOST$" Port="$DB_PORT$" Database="$DB_DATABASE$" User="$DB_USER$" Password="$DB_PASSWORD$" Service="" /-->
+
+	<!-- 线程池设置 -->
+	<ThreadPool MaxThreadNum="$THREADPOOL_MAXTHREADNUM$" MaxIdleThreadNum="$THREADPOOL_MAXIDLETHREADNUM$" />
+
+	<!-- 行情缓存 -->
+	<!--1、SwitchOn ：行情缓存模式开启标志,true - 启用缓存， false - 不启用缓存
+                    默认不启用（即不配置行情缓存信息时）
+      2、CacheMode ：Full - 全量缓存模式，Used - 仅对使用到的行情数据做缓存
+                    如果APPServer启动的插件有类似“智能选股”等，需要对全部商品进行处理时，建议开启此标志
+      2、MinuteCacheDays：行情分线数据缓存的天数（交易日）,默认值：30个交易日(未配置或配置值小于1，则启用默认值)
+                    行情分线数据量较大，所以仅缓存最近MinuteCacheDays天的分线数据
+                    仅当“启用缓存”模式时生效-->
+	<QuotationCache SwitchOn="$QUOTATIONCACHE_SWITCHON$" CacheMode="$QUOTATIONCACHE_CACHEMODE$" MinuteCacheDays="$QUOTATIONCACHE_MINUTECACHEDAYS$" />
+
+	<!-- 交易日设定 -->
+	<TradeDays>
+		<TradeDay ExchID="0" FilePath="sh19901219_20141231.td"/>
+		<TradeDay ExchID="1" FilePath="sz19910403_20141231.td"/>
+		<TradeDay ExchID="2" FilePath="sh19901219_20141231.td"/>
+		<TradeDay ExchID="3" FilePath="sh19901219_20141231.td"/>
+		<TradeDay ExchID="F" FilePath="sh19901219_20141231.td"/>
+		<TradeDay ExchID="D" FilePath="sh19901219_20141231.td"/>
+		<TradeDay ExchID="Z" FilePath="sh19901219_20141231.td"/>
+		<TradeDay ExchID="S" FilePath="sh19901219_20141231.td"/>
+	</TradeDays>
+
+</Configuration>

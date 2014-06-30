@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuotV5", "QuotV5BinaryProxy\QuotV5.csproj", "{3450FD40-CA8A-49C2-AEBB-2877CF2E2593}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuotV5Proxy", "QuotV5BinaryProxy\QuotV5Proxy.csproj", "{3450FD40-CA8A-49C2-AEBB-2877CF2E2593}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V5Test", "V5Test\V5Test.csproj", "{35823DDD-BAA7-49A1-A5AB-5C104FEA97D3}"
 EndProject
@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{67939BAB-471
 		Doc\深圳证券交易所数据文件交换接口规范1.00β-修订版.pdf = Doc\深圳证券交易所数据文件交换接口规范1.00β-修订版.pdf
 		Doc\深圳证券交易所第五版交易系统接口规范开发指南1.00β-修订版.pdf = Doc\深圳证券交易所第五版交易系统接口规范开发指南1.00β-修订版.pdf
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDServer", "MDServer\MDServer.csproj", "{862E550C-13E2-4E2C-811F-888D109B009F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDS.Plugin.StockV5", "MDS.Plugin.StockV5\MDS.Plugin.StockV5.csproj", "{2F2FEA5B-034D-4AB6-9607-872601227804}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +46,26 @@ Global
 		{35823DDD-BAA7-49A1-A5AB-5C104FEA97D3}.Release|Mixed Platforms.Build.0 = Release|x86
 		{35823DDD-BAA7-49A1-A5AB-5C104FEA97D3}.Release|x86.ActiveCfg = Release|x86
 		{35823DDD-BAA7-49A1-A5AB-5C104FEA97D3}.Release|x86.Build.0 = Release|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Debug|x86.ActiveCfg = Debug|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Debug|x86.Build.0 = Debug|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Release|Any CPU.ActiveCfg = Release|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Release|Mixed Platforms.Build.0 = Release|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Release|x86.ActiveCfg = Release|x86
+		{862E550C-13E2-4E2C-811F-888D109B009F}.Release|x86.Build.0 = Release|x86
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

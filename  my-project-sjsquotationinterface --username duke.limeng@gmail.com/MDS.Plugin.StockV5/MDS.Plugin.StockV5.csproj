@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2F2FEA5B-034D-4AB6-9607-872601227804}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MDS.Plugin.StockV5</RootNamespace>
+    <AssemblyName>MDS.Plugin.StockV5</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Log4cb">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\Log4cb.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceHost">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceHost.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceManager">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataSnaps\RawQuotationInfoSnap.cs" />
+    <Compile Include="DataSnaps\RawStaticInfoSnap.cs" />
+    <Compile Include="DataSnaps\StoredDataSnap.cs" />
+    <Compile Include="Models\QuotationInfo.cs" />
+    <Compile Include="Models\StockInfo.cs" />
+    <Compile Include="Plugin\Plugin.cs" />
+    <Compile Include="Plugin\PluginContext.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuotationCenter.cs" />
+    <Compile Include="QuotationManager.cs" />
+    <Compile Include="QuotationProvider\CashAuctionParamsProvider.cs" />
+    <Compile Include="QuotationProvider\DerivativeAuctionParamsProvider.cs" />
+    <Compile Include="QuotationProvider\IndexInfoProvider.cs" />
+    <Compile Include="QuotationProvider\NegotiationParamsProvider.cs" />
+    <Compile Include="QuotationProvider\SecurityInfoProvider.cs" />
+    <Compile Include="QuotationProvider\StaticInfoProvider.cs" />
+    <Compile Include="Repository\QuotationDataType.cs" />
+    <Compile Include="Repository\QuotationPublisher.cs" />
+    <Compile Include="Repository\QuotationRepository.cs" />
+    <Compile Include="Repository\QuotationSource.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MDS.Plugin.Stock.xml">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QuotV5BinaryProxy\QuotV5Proxy.csproj">
+      <Project>{3450FD40-CA8A-49C2-AEBB-2877CF2E2593}</Project>
+      <Name>QuotV5Proxy</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MQPublisher\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

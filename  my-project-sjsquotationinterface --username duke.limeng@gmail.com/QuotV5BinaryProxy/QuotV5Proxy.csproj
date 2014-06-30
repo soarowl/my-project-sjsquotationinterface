@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>QuotV5</RootNamespace>
-    <AssemblyName>QuotV5</AssemblyName>
+    <AssemblyName>QuotV5Proxy</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -51,7 +51,6 @@
     <Compile Include="Binary\MsgDefinations\IMarketData.cs" />
     <Compile Include="Binary\MsgDefinations\QuotSnap.cs" />
     <Compile Include="Binary\MsgDefinations\Order.cs" />
-    <Compile Include="StaticInfoProvider.cs" />
     <Compile Include="StaticInfo\Definations\DerivativeAuctionParams.cs" />
     <Compile Include="StaticInfo\Definations\Securities.cs" />
     <Compile Include="StaticInfo\Parsers\CashAuctionParamsParser.cs" />

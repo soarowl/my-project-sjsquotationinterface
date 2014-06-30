@@ -6,7 +6,7 @@ using System.Threading;
 using System.IO;
 using Log4cb;
 
-namespace QuotV5
+namespace MDS.Plugin.StockV5
 {
     public class StaticInfoProvider<TStaticInfo>
     {
@@ -37,7 +37,7 @@ namespace QuotV5
         /// </summary>
         public void Start()
         {
-            this.logHelper.LogInfoMsg("开始启动{0}文件的Provider", getFileFullPath());
+            this.logHelper.LogInfoMsg("开始启动{0}文件的Provider", GetFileFullPath());
             this.stopEvent.Reset();
 
             // 检查是否已经启动
@@ -45,7 +45,7 @@ namespace QuotV5
                 return;
 
             ///创建并启动文件读取线程
-            this.scanThread = new Thread(new ThreadStart(loopScan));
+            this.scanThread = new Thread(new ThreadStart(LoopScan));
             this.scanThread.Start();
             Thread.Sleep(0);
         }
@@ -63,18 +63,16 @@ namespace QuotV5
         /// <summary>
         /// 扫描DBF文件
         /// </summary>
-        protected void onScanData()
-        {
-
-        }
+        protected abstract void OnScanData();
+      
 
 
         /// <summary>
         /// 文件读取线程
         /// </summary>
-        private void loopScan()
+        private void LoopScan()
         {
-            string filePath = getFileFullPath();
+            string filePath = GetFileFullPath();
             this.logHelper.LogInfoMsg("启动{0}的Provider成功, 扫描时间间隔:{1}秒", filePath, this.config.ScanInterval.TotalSeconds);
 
             DateTime? lastStartTime = null;
@@ -102,12 +100,12 @@ namespace QuotV5
                         break;
                     }
                     lastStartTime = DateTime.Now;
-                    onScanData();
+                    OnScanData();
                 }
             }
             catch (Exception err)
             {
-                this.logHelper.LogErrMsg(err, "{0}的Provider数据扫描线程异常退出", getFileFullPath());
+                this.logHelper.LogErrMsg(err, "{0}的Provider数据扫描线程异常退出", GetFileFullPath());
             }
 
             this.scanThread = null;
@@ -119,7 +117,7 @@ namespace QuotV5
         /// </summary>
         /// <returns>
         /// </returns>
-        protected string getFileFullPath()
+        protected string GetFileFullPath()
         {
             DateTime now = DateTime.Now;
             return this.config.PathFormat.Replace("{YYYYMMDD}", now.ToString("yyyyMMdd"));
@@ -133,7 +131,7 @@ namespace QuotV5
         /// </summary>
         /// <param name="records"></param>
         /// <param name="timestamp"></param>
-        protected void onStaticInfoRead(List<TStaticInfo> records)
+        protected void RaiseStaticInfoReadEvent(List<TStaticInfo> records)
         {
             Action<List<TStaticInfo>> handler = this.OnStaticInfoRead;
             if (handler != null)
@@ -154,4 +152,5 @@ namespace QuotV5
         public TimeSpan ScanInterval { get; set; }
 
     }
+
 }
