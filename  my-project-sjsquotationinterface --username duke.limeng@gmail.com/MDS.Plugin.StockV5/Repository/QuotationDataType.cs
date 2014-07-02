@@ -11,12 +11,12 @@ namespace MDS.Plugin.StockV5
     public enum QuotationDataType : int
     {
         /// <summary>
-        /// 基本资料（最新快照）[支持订阅]
+        /// 证券信息
         /// </summary>
-        BasicInfo = 2,
+        StockInfo = 2,
 
         /// <summary>
-        /// 实时行情（最新快照）[支持订阅]
+        /// 动态行情
         /// </summary>
         Quotation = 3,
 

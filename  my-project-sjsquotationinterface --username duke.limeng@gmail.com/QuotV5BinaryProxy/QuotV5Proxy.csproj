@@ -55,6 +55,7 @@
     <Compile Include="StaticInfo\Definations\Securities.cs" />
     <Compile Include="StaticInfo\Parsers\CashAuctionParamsParser.cs" />
     <Compile Include="StaticInfo\Parsers\DerivativeAuctionParamsParser.cs" />
+    <Compile Include="StaticInfo\Parsers\EVoteParamsParser.cs" />
     <Compile Include="StaticInfo\Parsers\IndexInfoParser.cs" />
     <Compile Include="StaticInfo\Parsers\NegotiationParamsParser.cs" />
     <Compile Include="StaticInfo\Parsers\ParserBase.cs" />

@@ -6,10 +6,9 @@ using System.IO;
 
 namespace MDS.Plugin.StockV5
 {
-
-    public class CashAuctionParamsProvider : StaticInfoProvider<QuotV5.StaticInfo.CashAuctionParams>
+    public class EVoteParamsProvider :StaticInfoProvider<QuotV5.StaticInfo.EVoteParams>
     {
-        QuotV5.StaticInfo.CashAuctionParamsParser parser = new QuotV5.StaticInfo.CashAuctionParamsParser();
+        QuotV5.StaticInfo.EVoteParamsParser parser = new QuotV5.StaticInfo.EVoteParamsParser();
         protected override void OnScanData()
         {
             string filePath = GetFileFullPath();
@@ -23,7 +22,7 @@ namespace MDS.Plugin.StockV5
                     if (fileContent == this.lastScanFileContent)
                         return;
 
-                    List<QuotV5.StaticInfo.CashAuctionParams> securityInfos = parser.Parse(fileContent);
+                    List<QuotV5.StaticInfo.EVoteParams> securityInfos = parser.Parse(fileContent);
 
                     RaiseStaticInfoReadEvent(securityInfos);
 
@@ -39,6 +38,6 @@ namespace MDS.Plugin.StockV5
                 this.logHelper.LogInfoMsg("文件不存在：{0}", filePath);
             }
         }
-    }
 
+    }
 }

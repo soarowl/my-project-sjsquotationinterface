@@ -5,6 +5,9 @@ using System.Text;
 
 namespace QuotV5.StaticInfo
 {
+    /// <summary>
+    /// 衍生品集中竞价交易类业务参考信息
+    /// </summary>
     [XmlParseInfo("AuctionParams", "Security")]
     public class DerivativeAuctionParams
     {

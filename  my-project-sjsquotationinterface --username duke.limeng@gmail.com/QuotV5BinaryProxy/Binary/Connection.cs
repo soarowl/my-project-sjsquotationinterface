@@ -614,7 +614,6 @@ namespace QuotV5.Binary
 
         protected override void OnLogonSucceed()
         {
-
             base.OnLogonSucceed();
         }
     }

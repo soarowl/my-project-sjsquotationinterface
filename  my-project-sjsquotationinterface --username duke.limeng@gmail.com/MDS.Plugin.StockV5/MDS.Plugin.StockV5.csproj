@@ -40,6 +40,10 @@
     <Reference Include="ServiceManager">
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceManager.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Redis, Version=3.9.42.0, Culture=neutral, PublicKeyToken=e5d70ba0f6fb5d22, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Kernel\Bins\Release\ServiceStack.Redis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,6 +58,7 @@
     <Compile Include="DataSnaps\StoredDataSnap.cs" />
     <Compile Include="Models\QuotationInfo.cs" />
     <Compile Include="Models\StockInfo.cs" />
+    <Compile Include="MQPublisher\QuotationMQPublisher.cs" />
     <Compile Include="Plugin\Plugin.cs" />
     <Compile Include="Plugin\PluginContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -61,6 +66,7 @@
     <Compile Include="QuotationManager.cs" />
     <Compile Include="QuotationProvider\CashAuctionParamsProvider.cs" />
     <Compile Include="QuotationProvider\DerivativeAuctionParamsProvider.cs" />
+    <Compile Include="QuotationProvider\EVoteParamsProvider.cs" />
     <Compile Include="QuotationProvider\IndexInfoProvider.cs" />
     <Compile Include="QuotationProvider\NegotiationParamsProvider.cs" />
     <Compile Include="QuotationProvider\SecurityInfoProvider.cs" />
@@ -81,9 +87,7 @@
       <Name>QuotV5Proxy</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MQPublisher\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

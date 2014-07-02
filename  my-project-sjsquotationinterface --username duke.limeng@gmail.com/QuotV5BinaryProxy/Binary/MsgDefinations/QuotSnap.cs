@@ -110,6 +110,7 @@ namespace QuotV5.Binary
             }
         }
     }
+   
     /// <summary>
     /// 集中竞价业务行情快照扩展信息
     /// </summary>
@@ -238,6 +239,140 @@ namespace QuotV5.Binary
             return rtn;
         }
     }
+
+
+    /// <summary>
+    /// 指数行情快照扩展信息
+    /// </summary>
+    public class QuotSnapExtInfo309011 : QuotSnapExtInfoBase<QuotSnapExtInfo309011>
+    {
+        private static int mdEntrySize = Marshal.SizeOf(typeof(MDEntry));
+
+
+        #region 结构定义
+        public UInt32 NoMDEntries { get; private set; }
+
+        public MDEntry[] MDEntries { get; private set; }
+        
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct MDEntry
+        {
+            /// <summary>
+            /// 行情条目类别
+            /// </summary>
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 2)]
+            public string MDEntryType;
+
+            /// <summary>
+            /// 价格
+            /// </summary>
+            public Int64 MDEntryPx;
+        }
+
+        #endregion
+
+        protected override QuotSnapExtInfo309011 deserialize(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length < 4)
+                return null;
+            QuotSnapExtInfo309011 rtn = new QuotSnapExtInfo309011();
+
+            Array.Reverse(bytes, 0, 4);
+            rtn.NoMDEntries = BitConverter.ToUInt32(bytes, 0);
+            if (rtn.NoMDEntries > 0)
+            {
+                rtn.MDEntries = new MDEntry[rtn.NoMDEntries];
+                int startIndex = 4;
+
+                for (int entryIndex = 0; entryIndex < rtn.NoMDEntries; entryIndex++)
+                {
+                    if (bytes.Length - startIndex >= mdEntrySize)
+                    {
+                        var mdEntryBytes = bytes.Skip(startIndex).Take(mdEntrySize).ToArray();
+                        MDEntry mdEntry = BigEndianStructHelper<MDEntry>.BytesToStruct(mdEntryBytes, MsgConsts.MsgEncoding);
+                        startIndex += mdEntrySize;
+                        rtn.MDEntries[entryIndex] = mdEntry;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            return rtn;
+        }
+
+    }
+
+    /// <summary>
+    /// 盘后定价大宗交易业务行情快照扩展信息
+    /// </summary>
+    public class QuotSnapExtInfo300611 : QuotSnapExtInfoBase<QuotSnapExtInfo300611>
+    {
+        private static int mdEntrySize = Marshal.SizeOf(typeof(MDEntry));
+
+
+        #region 结构定义
+        public UInt32 NoMDEntries { get; private set; }
+
+        public MDEntry[] MDEntries { get; private set; }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct MDEntry
+        {
+            /// <summary>
+            /// 行情条目类别
+            /// </summary>
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 2)]
+            public string MDEntryType;
+
+            /// <summary>
+            /// 价格
+            /// </summary>
+            public Int64 MDEntryPx;
+
+            /// <summary>
+            /// 数量
+            /// </summary>
+            public Int64 MDEntrySize;
+        }
+
+        #endregion
+
+        protected override QuotSnapExtInfo300611 deserialize(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length < 4)
+                return null;
+            QuotSnapExtInfo300611 rtn = new QuotSnapExtInfo300611();
+
+            Array.Reverse(bytes, 0, 4);
+            rtn.NoMDEntries = BitConverter.ToUInt32(bytes, 0);
+            if (rtn.NoMDEntries > 0)
+            {
+                rtn.MDEntries = new MDEntry[rtn.NoMDEntries];
+                int startIndex = 4;
+
+                for (int entryIndex = 0; entryIndex < rtn.NoMDEntries; entryIndex++)
+                {
+                    if (bytes.Length - startIndex >= mdEntrySize)
+                    {
+                        var mdEntryBytes = bytes.Skip(startIndex).Take(mdEntrySize).ToArray();
+                        MDEntry mdEntry = BigEndianStructHelper<MDEntry>.BytesToStruct(mdEntryBytes, MsgConsts.MsgEncoding);
+                        startIndex += mdEntrySize;
+                        rtn.MDEntries[entryIndex] = mdEntry;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            return rtn;
+        }
+
+    }
+
+
     #endregion
 
     #region 行情快照信息定义
@@ -287,6 +422,22 @@ namespace QuotV5.Binary
     public class QuotSnap300111 : QuotSnapBase<QuotSnapExtInfo300111, QuotSnap300111>
     {
 
+    }
+
+    /// <summary>
+    /// 指数行情快照
+    /// </summary>
+    public class QuotSnap309011 : QuotSnapBase<QuotSnapExtInfo309011, QuotSnap309011>
+    { 
+    
+    }
+
+    /// <summary>
+    /// 盘后定价大宗交易业务行情快照
+    /// </summary>
+    public class QuotSnap300611 : QuotSnapBase<QuotSnapExtInfo300611, QuotSnap300611>
+    { 
+    
     }
 
     #endregion

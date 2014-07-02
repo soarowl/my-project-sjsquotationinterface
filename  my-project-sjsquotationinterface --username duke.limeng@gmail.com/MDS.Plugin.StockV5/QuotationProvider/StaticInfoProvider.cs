@@ -8,12 +8,13 @@ using Log4cb;
 
 namespace MDS.Plugin.StockV5
 {
-    public class StaticInfoProvider<TStaticInfo>
+    public abstract class StaticInfoProvider<TStaticInfo>
     {
         public event Action<List<TStaticInfo>> OnStaticInfoRead;
-
-        private StaticInfoProviderConfig config;
-        private Log4cb.ILog4cbHelper logHelper;
+        protected  static Encoding encoding = Encoding.UTF8;
+        protected StaticInfoProviderConfig config;
+        protected Log4cb.ILog4cbHelper logHelper;
+        protected string lastScanFileContent;
 
         /// <summary>
         /// 扫描线程
@@ -72,8 +73,8 @@ namespace MDS.Plugin.StockV5
         /// </summary>
         private void LoopScan()
         {
-            string filePath = GetFileFullPath();
-            this.logHelper.LogInfoMsg("启动{0}的Provider成功, 扫描时间间隔:{1}秒", filePath, this.config.ScanInterval.TotalSeconds);
+           
+            this.logHelper.LogInfoMsg("启动{0}的Provider成功, 扫描时间间隔:{1}秒", this.config.PathFormat, this.config.ScanInterval.TotalSeconds);
 
             DateTime? lastStartTime = null;
             try
@@ -84,7 +85,7 @@ namespace MDS.Plugin.StockV5
                     if (lastStartTime.HasValue)
                     {
                         TimeSpan sinceLastScan = DateTime.Now - lastStartTime.Value;
-                        this.logHelper.LogPerformaceMsg(Log4cbType.LogFileOnly, "读取并处理{0}总耗时{1}ms", filePath, sinceLastScan.TotalMilliseconds);
+                        this.logHelper.LogPerformaceMsg(Log4cbType.LogFileOnly, "读取并处理{0}总耗时{1}ms", this.config.PathFormat,, sinceLastScan.TotalMilliseconds);
 
                         waitMS = this.config.ScanInterval.TotalMilliseconds - sinceLastScan.TotalMilliseconds;
                         if (waitMS < 0)
@@ -96,7 +97,7 @@ namespace MDS.Plugin.StockV5
                     //停止事件发生,退出发送线程
                     if (index == 0)
                     {
-                        this.logHelper.LogInfoMsg("{0}的Provider正常退出", filePath);
+                        this.logHelper.LogInfoMsg("{0}的Provider正常退出", this.config.PathFormat,);
                         break;
                     }
                     lastStartTime = DateTime.Now;
@@ -105,7 +106,7 @@ namespace MDS.Plugin.StockV5
             }
             catch (Exception err)
             {
-                this.logHelper.LogErrMsg(err, "{0}的Provider数据扫描线程异常退出", GetFileFullPath());
+                this.logHelper.LogErrMsg(err, "{0}的Provider数据扫描线程异常退出", this.config.PathFormat);
             }
 
             this.scanThread = null;
@@ -124,7 +125,45 @@ namespace MDS.Plugin.StockV5
 
         }
 
+        protected static string ReadAllText(string fileFullPath, Encoding encoding)
+        {
+            byte[] fileBytes = ReadAllBytes(fileFullPath);
+            if (fileBytes == null)
+                return null;
+            else
+                return encoding.GetString(fileBytes);
+        }
 
+        protected static byte[] ReadAllBytes(string fileFullPath)
+        {
+            using (FileStream fileStream = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                if (!fileStream.CanRead)
+                {
+                    throw new Exception("文件流不可读");
+                }
+                else if (fileStream.Length <= 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    byte[] fileBuffer = null;
+                    int nRead = 0;
+                    fileBuffer = new byte[fileStream.Length];
+                    nRead = fileStream.Read(fileBuffer, 0, (int)fileStream.Length);
+                    if (nRead == fileStream.Length)
+                    {
+                        return fileBuffer;
+                    }
+                    else
+                    {
+                        throw new Exception("未能完整读取文件流");
+                    }
+                }
+            }
+
+        }
 
         /// <summary>
         /// 触发OnStaticInfoRead事件
