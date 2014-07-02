@@ -30,7 +30,13 @@ namespace QuotV5
                 if (ass.Name != "System.Core")
                 {
                     var refAss = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == ass.Name);
-                    cp.ReferencedAssemblies.Add(refAss.Location);
+                    if (refAss != null)
+                        cp.ReferencedAssemblies.Add(refAss.Location);
+                    else
+                    { 
+                    
+                    
+                    }
                 }
             }
 
@@ -43,6 +49,7 @@ namespace QuotV5
             {
                 Exception ex = new Exception();
                 ex.Data["code"] = code;
+                throw ex;
             }
             else
             {
@@ -100,7 +107,7 @@ namespace QuotV5
         }
         private static void GenerateCode_StructToBytes(StringBuilder sb, Type type)
         {
-            sb.AppendLine(string.Format("public static byte[] StructToBytes({0} obj,System.Text.Encoding encoding)", type.FullName.Replace("+",".")));
+            sb.AppendLine(string.Format("public static byte[] StructToBytes({0} obj,System.Text.Encoding encoding)", type.FullName.Replace("+", ".")));
             sb.AppendLine("{");//method start
 
 
@@ -140,8 +147,14 @@ namespace QuotV5
                 }
                 else if (fieldType == typeof(Boolean))
                 {
-                    sb.AppendLine(string.Format("var fieldBytes_{0}= BitConverter.GetBytes (obj.{0});", field.Name));
-                    sb.AppendLine(string.Format("fieldBytes_{0}.CopyTo(rtn,{1});", field.Name, offset));
+
+                    //bool占2字节
+                    sb.AppendLine(string.Format("rtn[{0}]=1;", offset + 1));
+
+                    //bool占4字节
+                    //sb.AppendLine(string.Format("var fieldBytes_{0}= BitConverter.GetBytes (obj.{0});", field.Name));
+                    //sb.AppendLine(string.Format("fieldBytes_{0}.CopyTo(rtn,{1});", field.Name, offset));
+
                 }
                 else if (fieldType == typeof(Char))
                 {
@@ -201,7 +214,12 @@ namespace QuotV5
                 }
                 else if (fieldType == typeof(Boolean))
                 {
-                    sb.AppendLine(string.Format("rtn.{0}= BitConverter.To{2}(bytes,{1});", field.Name, offset, fieldType.Name));
+                    //bool占2个字节
+                    sb.AppendLine(string.Format("if(bytes[{0}]>0 || bytes[{0}+1]>0)", offset));
+                    sb.AppendLine(string.Format("rtn.{0}= true;", field.Name));
+
+                    //bool占4个字节
+                    // sb.AppendLine(string.Format("rtn.{0}= BitConverter.To{2}(bytes,{1});", field.Name, offset, fieldType.Name));
                 }
                 else if (fieldType == typeof(Char))
                 {
@@ -226,13 +244,13 @@ namespace QuotV5
         {
             return structToBytesExecutor.Execute(null, new object[] { obj, encoding }) as byte[];
         }
-        
+
         public static T BytesToStruct(byte[] bytes, Encoding encoding)
         {
             if (bytes == null)
                 throw new ArgumentNullException("bytes");
             if (bytes.Length != tSize)
-                throw new ArgumentException(string.Format ("数据长度与预期不一致，可能是数据结构不匹配，预期长度{0}，实际长度{1}",tSize,bytes.Length));
+                throw new ArgumentException(string.Format("[{2}]数据长度与预期不一致，可能是数据结构不匹配，预期长度{0}，实际长度{1}", tSize, bytes.Length, typeof(T)));
             return (T)bytesToStructExecutor.Execute(null, new object[] { bytes, encoding });
         }
     }

@@ -13,7 +13,7 @@ namespace QuotV5.Binary
         /// </summary>
         public Int32 SessionStatus;
         
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 58)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 200)]
         public string Text;
     }
 }

@@ -15,7 +15,7 @@ namespace QuotV5.Binary
 
         public SecuritySwitch[] Switches { get; set; }
 
-        public static override RealtimeStatus Deserialize(byte[] bytes)
+        public static  RealtimeStatus Deserialize(byte[] bytes)
         {
             if (bytes == null || bytes.Length < statusSize)
                 return null;
@@ -76,6 +76,7 @@ namespace QuotV5.Binary
     public struct SecuritySwitch
     {
         public SecuritySwitchType Type;
+        [MarshalAs(UnmanagedType.VariantBool)]//这里是为了在序列化时使其占用2个字节，而不是默认的4个
         public bool Status;
     }
 }

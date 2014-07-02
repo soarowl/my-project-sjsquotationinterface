@@ -12,10 +12,10 @@ namespace V5Test
         static Log4cb.ILog4cbHelper logHelper = new Log4cb.Log4cbHelper("V5");
         static void Main(string[] args)
         {
-            //testRealtimeQuotConn();
+            testRealtimeQuotConn();
             // testStaticInfo_Index();
             //testStaticInfo_Security();
-            testStaticInfo_CashAuctionParams();
+          //  testStaticInfo_CashAuctionParams();
             //testStaticInfo_DerivativeAuctionParams();
             //testFastReflection();
             //testObjectCreator();
@@ -181,13 +181,13 @@ namespace V5Test
         {
             QuotV5.Binary.ConnectionConfig cfg = new QuotV5.Binary.ConnectionConfig()
             {
-                IP = System.Net.IPAddress.Parse("127.0.0.1"),
-                TargetCompID = "mdgw11              ",
+                IP = System.Net.IPAddress.Parse("172.16.1.99"),
+                TargetCompID = "N4005Q0001          ",
                 Port = 8016,
                 HeartbeatIntervalS = 3,
-                ConnectionTimeoutMS = 6000,
-                ReconnectIntervalMS = 3000,
-                SenderCompID = "Realtime1           ",
+                ConnectionTimeoutMS = 10000,
+                ReconnectIntervalMS = 5000,
+                SenderCompID = "realtime            ",
                 Password = "                "
             };
             QuotV5.Binary.RealTimeQuotConnection conn = new QuotV5.Binary.RealTimeQuotConnection(cfg, logHelper);
@@ -206,6 +206,7 @@ namespace V5Test
             {
                 logHelper.LogInfoMsg("收到QuotSnap300111");
             }
+            
         }
 
 

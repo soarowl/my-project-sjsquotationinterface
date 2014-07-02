@@ -36,7 +36,7 @@ namespace QuotV5.Binary
         /// <summary>
         /// 二进制协议版本
         /// </summary>
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
         public string DefaultApplVerID;
 
         /// <summary>

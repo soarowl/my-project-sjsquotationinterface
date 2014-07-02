@@ -581,19 +581,39 @@ namespace QuotV5.Binary
         /// 处理行情数据
         /// </summary>
         /// <param name="msg"></param>
+        /// TODO:考虑把收到的数据包加入队列异步处理
         private void ProcessMessage(MessagePack msg)
         {
             IMarketData marketData = null;
-            if (msg.Header.Type == (uint)MsgType.QuotationSnap)
+            if (msg.Header.Type == (uint)MsgType.ChannelHeartbeat)
+            {
+                ChannelHeartbeat heartbeat = ChannelHeartbeat.Deserialize(msg.BodyData);
+                logMarketData < ChannelHeartbeat>(heartbeat);
+            }
+            else if (msg.Header.Type == (uint)MsgType.QuotationSnap)
             {
                 marketData = QuotSnap300111.Deserialize(msg.BodyData);
-
+                logMarketData<QuotSnap300111>(marketData as QuotSnap300111);
             }
             else if (msg.Header.Type == (uint)MsgType.Order)
             {
                 marketData = Order300192.Deserialize(msg.BodyData);
+                logMarketData<Order300192>((Order300192)marketData);
             }
-            RaiseEvent(marketData);
+            if (marketData != null)
+            {
+                logMarketData(marketData);
+                RaiseEvent(marketData);
+            }
+            
+        }
+
+    
+
+        private void logMarketData<TMarketData>(TMarketData marketData)
+        {
+            string str=ObjectLogHelper<TMarketData>.ObjectToString(marketData);
+            logHelper.LogDebugMsg("收到数据：\r\n{0}",str);
         }
 
         private void RaiseEvent(IMarketData marketData)

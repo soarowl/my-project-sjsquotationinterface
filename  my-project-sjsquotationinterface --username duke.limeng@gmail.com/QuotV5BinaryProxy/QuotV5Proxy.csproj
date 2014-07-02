@@ -103,6 +103,7 @@
     <Compile Include="StaticInfo\Definations\Stat.cs" />
     <Compile Include="StaticInfo\Definations\WarrantClearingType.cs" />
     <Compile Include="Utils\ObjectCreator.cs" />
+    <Compile Include="Utils\ObjectLogHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Libs\Log4cb.dll" />
