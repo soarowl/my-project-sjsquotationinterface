@@ -10,7 +10,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 市场代码
         /// </summary>
-        public char exchId;
+        public string exchId;
 
         /// <summary>
         /// 证券代码
@@ -116,8 +116,6 @@ namespace MDS.Plugin.StockV5
         /// </summary>
         public string tradeTimeFlag;
 
-
-
         /// <summary>
         /// 暂停交易标志
         /// </summary>
@@ -174,7 +172,7 @@ namespace MDS.Plugin.StockV5
         public decimal newIndex;
 
         /// <summary>
-        /// 行情时间
+        /// 行情时间（YYYYMMDDHHMMSSsss）
         /// </summary>
         public Int64 changeTime;
         

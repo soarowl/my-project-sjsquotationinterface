@@ -106,7 +106,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N13(4)
         /// </remarks>
-        public double PrevClosePx { get; set; }
+        public decimal PrevClosePx { get; set; }
 
         /// <summary>
         /// 证券状态

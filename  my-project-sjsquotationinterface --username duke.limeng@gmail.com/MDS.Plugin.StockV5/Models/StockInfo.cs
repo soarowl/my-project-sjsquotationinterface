@@ -10,7 +10,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 市场代码
         /// </summary>
-        public char exchId;
+        public string exchId;
        
         /// <summary>
         /// 证券代码
@@ -30,7 +30,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 交易单位
         /// </summary>
-        public double tradeUnit;
+        public Int16 tradeUnit;
 
         /// <summary>
         /// 行业种类
@@ -41,36 +41,41 @@ namespace MDS.Plugin.StockV5
         /// 每股面值
         /// </summary>
         public double stkParValue;
+
         /// <summary>
         /// 流通股数
         /// </summary>
-        public decimal totalCurrentStkQty;
+        public Int64 totalCurrentStkQty;
+        
         /// <summary>
         /// 上年利润
         /// </summary>
         public double lastYearProfit;
+       
         /// <summary>
         /// 本年利润
         /// </summary>
         public double thisYearProfit;
+       
         /// <summary>
         /// 上市日期
         /// </summary>
-        public Int32 listedDate;
+        public Int64 listedDate;
+        
         /// <summary>
         /// 到期/交割日
         /// </summary>
-        public Int32 endingDate;
+        public Int64 endingDate;
 
         /// <summary>
-        /// 买数量单位
+        /// 买委托上限
         /// </summary>
-        public double buyQtyUnit;
+        public Int32 buyQtyUpperLimit;
 
         /// <summary>
-        /// 卖数量单位
+        /// 卖委托上限
         /// </summary>
-        public double sellQtyUnit;
+        public Int32 sellQtyUpperLimit;
 
         /// <summary>
         /// 价格档位
@@ -90,17 +95,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 限价参数
         /// </summary>
-        public char priceLimitFlag;
-
-        ///// <summary>
-        ///// 涨停价格
-        ///// </summary>
-        //public double maxOrderPrice;
-
-        ///// <summary>
-        ///// 跌停价格
-        ///// </summary>
-        //public double minOrderPrice;
+        public Int32 priceLimitFlag;
 
         /// <summary>
         /// 折合比例
@@ -120,22 +115,22 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 停牌标志
         /// </summary>
-        public char closeFlag;
+        public string closeFlag;
 
         /// <summary>
         /// 除权除息标志
         /// </summary>
-        public char stkAllotFlag;
+        public string stkAllotFlag;
 
         /// <summary>
         /// 成标志
         /// </summary>
-        public char stkIndexFlag;
+        public string stkIndexFlag;
 
         /// <summary>
         /// 昨收价
         /// </summary>
-        public double closePrice;
+        public decimal closePrice;
 
         /// <summary>
         /// 成交数量
@@ -155,12 +150,8 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 总股本
         /// </summary>
-        public decimal totalStkQty;
+        public Int64 totalStkQty;
 
-        /// <summary>
-        /// 证券简称前缀
-        /// </summary>
-        public string stkIdPrefix;
 
         /// <summary>
         /// 基础证券
@@ -180,7 +171,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 债券起息日
         /// </summary>
-        public Int32 beginInterestDate;
+        public Int64 beginInterestDate;
 
         /// <summary>
         /// 大宗交易价格上限
@@ -200,52 +191,38 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 融资标的标志
         /// </summary>
-        public bool isCreditCashStk;
+        public string isCreditCashStk;
 
         /// <summary>
         /// 融券标的标志
         /// </summary>
-        public bool isCreditShareStk;
+        public string isCreditShareStk;
 
         /// <summary>
         /// 做市商标志
         /// </summary>
-        public bool marketMarkerFlag;
+        public string marketMarkerFlag;
 
         /// <summary>
         /// 交易类型
         /// </summary>
         public string exchTradeType;
 
-        /// <summary>
-        /// 产品交易阶段
-        /// </summary>
-        public string tradeTimeFlag;
 
         /// <summary>
         /// 暂停交易标志
         /// </summary>
-        public bool pauseTradeStatus;
-
-        /// <summary>
-        /// 融资交易状态
-        /// </summary>
-        public char passCreditCashStk;
-
-        /// <summary>
-        /// 融券交易状态
-        /// </summary>
-        public char passCreditShareStk;
+        public string pauseTradeStatus;
 
         /// <summary>
         /// 融券卖出价格
         /// </summary>
-        public char creditShareSellPriceFlag;
+        public string creditShareSellPriceFlag;
 
         /// <summary>
         /// 网络投票标志
         /// </summary>
-        public bool netVoteFlag;
+        public string netVoteFlag;
 
         /// <summary>
         /// 其它业务状态
@@ -257,19 +234,6 @@ namespace MDS.Plugin.StockV5
         /// </summary>
         public string exchMemo;
 
-        ///// <summary>
-        ///// 当前价
-        ///// </summary>
-        //public double newPrice;
 
-        ///// <summary>
-        ///// 最高价
-        ///// </summary>
-        //public double highPrice;
-        
-        ///// <summary>
-        ///// 最低价
-        ///// </summary>
-        //public double lowPrice;
     }
 }

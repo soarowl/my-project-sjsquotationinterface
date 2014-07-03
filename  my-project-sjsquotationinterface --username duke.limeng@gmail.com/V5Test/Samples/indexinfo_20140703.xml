@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Securities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Security>
+<SecurityID>399100  </SecurityID>
+<Symbol>深证新指数   </Symbol>
+<EnglishName>SZSE NEW INDEX      </EnglishName>
+<PreCloseIdx>4488.04570</PreCloseIdx>
+</Security>
+<Security>
+<SecurityID>399101  </SecurityID>
+<Symbol>中小板综指   </Symbol>
+<EnglishName>SZSE SME COMPOSITE  </EnglishName>
+<PreCloseIdx>5957.63320</PreCloseIdx>
+</Security>
+<Security>
+<SecurityID>399102  </SecurityID>
+<Symbol>创业板综指   </Symbol>
+<EnglishName>CHINEXT COMPOSITE   </EnglishName>
+<PreCloseIdx>1301.91380</PreCloseIdx>
+</Security>
+<Security>
+<SecurityID>399106  </SecurityID>
+<Symbol>深证综合指数  </Symbol>
+<EnglishName>SZSE COMPOSITE INDEX</EnglishName>
+<PreCloseIdx>1026.93880</PreCloseIdx>
+</Security>
+<Security>
+<SecurityID>399107  </SecurityID>
+<Symbol>深证Ａ股指数  </Symbol>
+<EnglishName>SZSE A SHARE INDEX  </EnglishName>
+<PreCloseIdx>1071.69030</PreCloseIdx>
+</Security>
+<Security>
+<SecurityID>399108  </SecurityID>
+<Symbol>深证Ｂ股指数  </Symbol>
+<EnglishName>SZSE B SHARE INDEX  </EnglishName>
+<PreCloseIdx>846.67710</PreCloseIdx>
+</Security>
+</Securities>

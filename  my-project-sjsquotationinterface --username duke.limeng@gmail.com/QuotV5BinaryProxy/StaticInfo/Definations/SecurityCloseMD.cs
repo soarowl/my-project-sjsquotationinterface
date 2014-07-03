@@ -8,7 +8,7 @@ namespace QuotV5.StaticInfo
     /// <summary>
     /// 证券收盘行情
     /// </summary>
-    class SecurityCloseMD
+    public class SecurityCloseMD
     {
         /// <summary>
         /// 证券代码

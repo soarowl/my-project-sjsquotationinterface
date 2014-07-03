@@ -127,33 +127,30 @@ namespace MDS.Plugin.StockV5
 
             StockInfo rtn = new StockInfo()
             {
-                exchId = '0',
+                exchId = "0",
                 stkId = securityInfo.CommonInfo.SecurityID,
                 stkName = securityInfo.CommonInfo.Symbol,
                 stkEnglishtAbbr = securityInfo.CommonInfo.EnglishName,
-                tradeUnit = securityInfo.CommonInfo.QtyUnit,
+                // tradeUnit = securityInfo.CommonInfo.QtyUnit,
                 stkParValue = securityInfo.CommonInfo.ParValue,
-                totalCurrentStkQty = securityInfo.CommonInfo.PublicFloatShareQuantity,
+                //  totalCurrentStkQty = securityInfo.CommonInfo.PublicFloatShareQuantity,
                 listedDate = securityInfo.CommonInfo.ListDate,
                 standardConvertRate = securityInfo.CommonInfo.ContractMultiplier,
                 closePrice = securityInfo.CommonInfo.PrevClosePx,
                 basicStkId = securityInfo.CommonInfo.UnderlyingSecurityID,
                 ISINCode = securityInfo.CommonInfo.ISIN,
                 CMOStandardRate = securityInfo.CommonInfo.GageRatio,
-                totalStkQty = securityInfo.CommonInfo.OutstandingShare,
-                isCreditCashStk = securityInfo.CommonInfo.CrdBuyUnderlying,
-                isCreditShareStk = securityInfo.CommonInfo.CrdSellUnderlying,
+                //   totalStkQty = securityInfo.CommonInfo.OutstandingShare,
+                //   isCreditCashStk = securityInfo.CommonInfo.CrdBuyUnderlying,
+                //  isCreditShareStk = securityInfo.CommonInfo.CrdSellUnderlying,
 
-                buyQtyUnit = cashAuctionParams.BuyQtyUnit,
-                sellQtyUnit = cashAuctionParams.SellQtyUnit,
+
                 orderPriceUnit = cashAuctionParams.PriceTick,
-                marketMarkerFlag = cashAuctionParams.MarketMakerFlag,
+                // marketMarkerFlag = cashAuctionParams.MarketMakerFlag,
 
                 exchTotalKnockQty = quotSnap.CommonInfo.TotalValueTrade,
                 exchTotalKnockAmt = quotSnap.CommonInfo.TotalValueTrade,
-                tradeTimeFlag = quotSnap.CommonInfo.TradingPhaseCode,
 
-                stkIdPrefix = status.Status.SecurityPreName,
 
 
                 //newPrice = 0,
@@ -166,17 +163,15 @@ namespace MDS.Plugin.StockV5
                 priceLimitFlag = default(char),
                 tradeStatus = null,
                 stkLevel = null,
-                closeFlag = default(char),
-                stkAllotFlag = default(char),
-                stkIndexFlag = default(char),
-                creditShareSellPriceFlag = default(char),
+                closeFlag = null,
+                stkAllotFlag = null,
+                stkIndexFlag = null,
+                creditShareSellPriceFlag = null,
                 exchTradeType = null,
                 otherBusinessMark = null,
-                passCreditCashStk = default(char),
-                passCreditShareStk = default(char),
-                pauseTradeStatus = false,
+                pauseTradeStatus = null,
 
-                netVoteFlag = false,
+                netVoteFlag = null,
                 #region 根据证券类型，从不同的扩展信息中获取的字段
 
                 stkIndustryType = null,
@@ -216,178 +211,89 @@ namespace MDS.Plugin.StockV5
                 rtn.NAV = para.NAV;
             }
 
-            if (eVoteParams != null)
-                rtn.netVoteFlag = true;
 
             return rtn;
         }
 
 
+        #region 为StockInfo赋值
 
-        /// <summary>
-        /// 构建股票的行情信息
-        /// </summary>
-        /// <param name="status"></param>
-        /// <param name="quotSnap"></param>
-        /// <param name="securityInfo"></param>
-        /// <returns></returns>
-        private QuotationInfo ConstructQuotationInfo(
-            QuotV5.Binary.RealtimeStatus status,
-            QuotV5.Binary.QuotSnap300111 quotSnap,
-            QuotV5.StaticInfo.StockSecurityInfo securityInfo)
-        {
-            QuotationInfo rtn = new QuotationInfo()
-            {
-                exchId = '0',
-                stkId = securityInfo.CommonInfo.SecurityID,
-                stkName = securityInfo.CommonInfo.Symbol,
-                knockQty = quotSnap.CommonInfo.TotalVolumeTrade,
-                knockMoney = quotSnap.CommonInfo.TotalValueTrade,
-
-                #region 不用赋值的字段
-                closeIndex = 0,
-                openIndex = 0,
-                highIndex = 0,
-                lowIndex = 0,
-                newIndex = 0,
-                #endregion
-
-                #region 稍后赋值的字段
-
-                #region 盘口
-                buyPrice1 = 0,
-                buyPrice2 = 0,
-                buyPrice3 = 0,
-                buyPrice4 = 0,
-                buyPrice5 = 0,
-                sellPrice1 = 0,
-                sellPrice2 = 0,
-                sellPrice3 = 0,
-                sellPrice4 = 0,
-                sellPrice5 = 0,
-                buyQty1 = 0,
-                buyQty2 = 0,
-                buyQty3 = 0,
-                buyQty4 = 0,
-                buyQty5 = 0,
-                sellQty1 = 0,
-                sellQty2 = 0,
-                sellQty3 = 0,
-                sellQty4 = 0,
-                sellQty5 = 0,
-                #endregion
-                closeFlag = default(char),
-                change = 0,
-                changePercent = 0,
-                #endregion
-            };
-
-            rtn.change = rtn.newPrice - rtn.closePrice;
-            if (rtn.closePrice != 0.0m)
-                rtn.changePercent = rtn.change / rtn.closePrice;
-
-
-
-            ;
-            return rtn;
-        }
-
-        /// <summary>
-        /// 构建指数的行情信息
-        /// </summary>
-        /// <param name="status"></param>
-        /// <param name="quotSnap"></param>
-        /// <param name="securityInfo"></param>
-        /// <returns></returns>
-        private QuotationInfo ConstructQuotationInfo(
-           QuotV5.Binary.RealtimeStatus status,
-           QuotV5.Binary.QuotSnap309011 quotSnap,
-           QuotV5.StaticInfo.IndexInfo securityInfo)
+        private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.SecurityInfoBase securityInfo)
         {
 
-            QuotationInfo rtn = new QuotationInfo()
+            stockInfo.stkId = securityInfo.CommonInfo.SecurityID;
+            stockInfo.stkName = securityInfo.CommonInfo.Symbol;
+            stockInfo.stkEnglishtAbbr = securityInfo.CommonInfo.EnglishName;
+            stockInfo.stkParValue = securityInfo.CommonInfo.ParValue;
+            stockInfo.totalCurrentStkQty = (Int64)securityInfo.CommonInfo.PublicFloatShareQuantity;
+            stockInfo.listedDate = securityInfo.CommonInfo.ListDate;
+            stockInfo.standardConvertRate = securityInfo.CommonInfo.ContractMultiplier;
+            stockInfo.closePrice = securityInfo.CommonInfo.PrevClosePx;
+            stockInfo.basicStkId = securityInfo.CommonInfo.UnderlyingSecurityID;
+            stockInfo.ISINCode = securityInfo.CommonInfo.ISIN;
+            stockInfo.CMOStandardRate = securityInfo.CommonInfo.GageRatio;
+            stockInfo.totalStkQty = (Int64)securityInfo.CommonInfo.OutstandingShare;
+            
+            stockInfo.isCreditCashStk = ConvertBooleanToString(securityInfo.CommonInfo.CrdBuyUnderlying);
+            stockInfo.isCreditShareStk = ConvertBooleanToString(securityInfo.CommonInfo.CrdSellUnderlying);
+
+            if (securityInfo is QuotV5.StaticInfo.StockSecurityInfo)
             {
-                exchId = '0',
-                stkId = securityInfo.SecurityID,
-                stkName = securityInfo.Symbol,
-                knockQty = quotSnap.CommonInfo.TotalVolumeTrade,
-                knockMoney = quotSnap.CommonInfo.TotalValueTrade,
-                stkIdPrefix = status.Status.SecurityPreName,
-                tradeTimeFlag = quotSnap.CommonInfo.TradingPhaseCode,
-
-
-
-
-
-                #region 不用赋值的字段
-                closePrice = 0,
-                openPrice = 0,
-                highPrice = 0,
-                lowPrice = 0,
-                newPrice = 0,
-                IOPV = 0,
-                maxOrderPrice = 0,
-                minOrderPrice = 0,
-
-                #region 盘口
-                buyPrice1 = 0,
-                buyPrice2 = 0,
-                buyPrice3 = 0,
-                buyPrice4 = 0,
-                buyPrice5 = 0,
-                sellPrice1 = 0,
-                sellPrice2 = 0,
-                sellPrice3 = 0,
-                sellPrice4 = 0,
-                sellPrice5 = 0,
-                buyQty1 = 0,
-                buyQty2 = 0,
-                buyQty3 = 0,
-                buyQty4 = 0,
-                buyQty5 = 0,
-                sellQty1 = 0,
-                sellQty2 = 0,
-                sellQty3 = 0,
-                sellQty4 = 0,
-                sellQty5 = 0,
-                #endregion
-
-                #endregion
-
-                #region 稍后赋值的字段
-                passCreditCashStk = default(char),
-                passCreditShareStk = default(char),
-                pauseTradeStatus = false,
-                closeFlag = default(char),
-                change = 0,
-                changePercent = 0,
-                closeIndex = 0,
-                openIndex = 0,
-                highIndex = 0,
-                lowIndex = 0,
-                newIndex = 0,
-
-
-                SendTime = 0,
-                ReceiveTime = 0,
-                #endregion
-
-                #region 无法获取的字段
-                levelFlag = null,
-                otherBusinessMark = null,
-                #endregion
-            };
-
-            rtn.change = rtn.newIndex - rtn.closeIndex;
-            if (rtn.closeIndex != 0.0m)
-                rtn.changePercent = rtn.change / rtn.closeIndex;
-
-
-            return rtn;
+                QuotV5.StaticInfo.StockParams para = (securityInfo as QuotV5.StaticInfo.StockSecurityInfo).Params;
+                stockInfo.stkIndustryType = para.IndustryClassification;
+                stockInfo.lastYearProfit = para.PreviousYearProfitPerShare;
+                stockInfo.thisYearProfit = para.CurrentYearProfitPerShare;
+            }
+            else if (securityInfo is QuotV5.StaticInfo.BondSecurityInfo)
+            {
+                QuotV5.StaticInfo.BondParams para = (securityInfo as QuotV5.StaticInfo.BondSecurityInfo).Params;
+                stockInfo.endingDate = para.MaturityDate;
+                stockInfo.accuredInterest = para.Interest;
+                stockInfo.beginInterestDate = para.InterestAccrualDate;
+            }
+            else if (securityInfo is QuotV5.StaticInfo.FundSecurityInfo)
+            {
+                QuotV5.StaticInfo.FundParams para = (securityInfo as QuotV5.StaticInfo.FundSecurityInfo).Params;
+                stockInfo.NAV = para.NAV;
+            }
         }
 
+        private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.IndexInfo securityInfo)
+        {
+            stockInfo.stkId = securityInfo.SecurityID;
+            stockInfo.stkName = securityInfo.Symbol;
+            stockInfo.stkEnglishtAbbr = securityInfo.EnglishName;
+            stockInfo.closePrice = securityInfo.PreCloseIdx;
+        }
+        private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.CashAuctionParams cashAuctionParams)
+        {
+            stockInfo.buyQtyUpperLimit = (int)cashAuctionParams.BuyQtyUpperLimit;
+            stockInfo.sellQtyUpperLimit = (int)cashAuctionParams.SellQtyUpperLimit;
+            stockInfo.orderPriceUnit = cashAuctionParams.PriceTick;
+            stockInfo.marketMarkerFlag = ConvertBooleanToString(cashAuctionParams.MarketMakerFlag);
+        }
 
+        private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.DerivativeAuctionParams derivativeAuctionParams)
+        {
+            stockInfo.buyQtyUpperLimit = (int)derivativeAuctionParams.BuyQtyUpperLimit;
+            stockInfo.sellQtyUpperLimit = (int)derivativeAuctionParams.SellQtyUpperLimit;
+            stockInfo.orderPriceUnit = derivativeAuctionParams.PriceTick;
+            stockInfo.marketMarkerFlag = ConvertBooleanToString(derivativeAuctionParams.MarketMakerFlag);
+        }
 
+        private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.NegotiationParams negotiationParams)
+        {
+
+        }
+
+        private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.SecurityCloseMD securityCloseMD)
+        {
+            stockInfo.exchTotalKnockAmt = securityCloseMD.TotalValueTrade;
+            stockInfo.exchTotalKnockQty = (Int64)securityCloseMD.TotalVolumeTrade;
+        }
+        #endregion
+
+        #region 为QuotationInfo属性赋值
         private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.StaticInfo.IndexInfo securityInfo)
         {
             quotInfo.stkId = securityInfo.SecurityID;
@@ -502,7 +408,7 @@ namespace MDS.Plugin.StockV5
                     {
                         quotInfo.openPrice = (decimal)mdEntry.Entry.MDEntryPx / d;
                     }
-                 
+
                     else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.SellPrice)
                     {
                         if (mdEntry.Entry.MDPriceLevel == 1)
@@ -539,11 +445,11 @@ namespace MDS.Plugin.StockV5
                     }
                     else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.PriceEarningRatio1)
                     {
-                        
+
                     }
                     else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.PriceEarningRatio2)
                     {
-                        
+
                     }
                 }
             }
@@ -561,8 +467,16 @@ namespace MDS.Plugin.StockV5
             quotInfo.closePrice = (decimal)quotSnapCommonInfo.PrevClosePx / 10000;
             quotInfo.changeTime = quotSnapCommonInfo.OrigTime;
         }
+        #endregion
 
-    
+
+        private string ConvertBooleanToString(bool value)
+        {
+            if (value)
+                return "Y";
+            else
+                return "F";
+        }
     }
 
 
