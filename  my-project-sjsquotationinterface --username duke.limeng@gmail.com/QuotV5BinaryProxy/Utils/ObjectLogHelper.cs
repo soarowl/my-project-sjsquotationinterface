@@ -8,10 +8,10 @@ using System.Runtime.InteropServices;
 
 namespace QuotV5
 {
-    public class ObjectLogHelper<T> 
+    public class ObjectLogHelper<T>
     {
         static DynamicMethodExecutor structToStringExecutor;
-
+        static List<Type> types = new List<Type>();
         static ObjectLogHelper()
         {
 
@@ -28,7 +28,8 @@ namespace QuotV5
                 if (ass.Name != "System.Core")
                 {
                     var refAss = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == ass.Name);
-                    cp.ReferencedAssemblies.Add(refAss.Location);
+                    if (refAss != null)
+                        cp.ReferencedAssemblies.Add(refAss.Location);
                 }
             }
 
@@ -74,123 +75,157 @@ namespace QuotV5
 
         }
 
+
         private static void GenerateCode_ObjectToStringClass(StringBuilder sb, Type type)
         {
-
-            foreach (var field in type.GetFields())
+            if (type.IsArray)
             {
-                if (!field.IsStatic && field.IsPublic && !field.FieldType.IsEnum)
+                Type elementType = type.GetElementType();
+                if (
+                    elementType == typeof(string)
+                   || elementType == typeof(Int16)
+                    || elementType == typeof(Int32)
+                    || elementType == typeof(Int64)
+                    || elementType == typeof(UInt16)
+                    || elementType == typeof(UInt32)
+                    || elementType == typeof(UInt64)
+                    || elementType == typeof(float)
+                    || elementType == typeof(Double)
+                    || elementType == typeof(Decimal)
+                    || elementType == typeof(Boolean)
+                    || elementType == typeof(Char)
+                    || elementType.IsEnum
+                    )
                 {
-                    if (field.FieldType.GetFields().Any(f => f.IsPublic && !f.IsStatic))
-                        GenerateCode_ObjectToStringClass(sb, field.FieldType);
+                }
+                else
+                {
+                    GenerateCode_ObjectToStringClass(sb, elementType);
+                }
+
+            }
+            else if (type.IsGenericType)
+            {
+                if (type.Name == "List`1")
+                {
+                    Type elementType = type.GetGenericArguments().First();
+                    if (
+                  elementType == typeof(string)
+                 || elementType == typeof(Int16)
+                  || elementType == typeof(Int32)
+                  || elementType == typeof(Int64)
+                  || elementType == typeof(UInt16)
+                  || elementType == typeof(UInt32)
+                  || elementType == typeof(UInt64)
+                  || elementType == typeof(float)
+                  || elementType == typeof(Double)
+                  || elementType == typeof(Decimal)
+                  || elementType == typeof(Boolean)
+                  || elementType == typeof(Char)
+                  || elementType.IsEnum
+                  )
+                    {
+                    }
+                    else
+                    {
+                        GenerateCode_ObjectToStringClass(sb, elementType);
+                    }
+                }
+                else
+                {
+                    throw new Exception(string.Format("暂不支持对该类型的处理:{0}", type.FullName));
                 }
             }
-            foreach (var property in type.GetProperties())
+            else
             {
-                if (property.CanRead)
+                foreach (var field in type.GetFields())
                 {
-                    if (!property.PropertyType.IsEnum)
+                    if (!field.IsStatic && field.IsPublic && !field.FieldType.IsEnum && field.FieldType !=typeof(string))
                     {
-                        if (property.PropertyType.GetFields().Any(f => f.IsPublic && !f.IsStatic))
-                            GenerateCode_ObjectToStringClass(sb, property.PropertyType);
-                        else if (property.PropertyType.GetProperties().Any(p => p.CanRead))
-                            GenerateCode_ObjectToStringClass(sb, property.PropertyType);
+                        GenerateCode_ObjectToStringClass(sb, field);
+                    }
+                }
+                foreach (var property in type.GetProperties())
+                {
+                    if (types.Contains(property.PropertyType))
+                        continue;
+                    if (property.CanRead && !property.PropertyType.IsEnum && property.PropertyType != typeof(string))
+                    {
+                        GenerateCode_ObjectToStringClass(sb, property);
                     }
                 }
             }
             sb.AppendLine("public class " + GenerateObjectToStringClassName(type));
             sb.AppendLine("{");//class start
 
-            GenerateCode_ObjectToString(sb, type);
-   
+            GenerateCode_ObjectToStringMethord(sb, type);
+
             sb.AppendLine("}");//class end
         }
-        private static string GenerateObjectToStringClassName(Type type)
+
+        private static void GenerateCode_ObjectToStringClass(StringBuilder sb, MemberInfo memberInfo)
         {
-            return "ObjectToString_" + type.FullName.Replace(".", "_").Replace("+", "__");
+            Type memberType;
+            if (memberInfo is FieldInfo)
+                memberType = (memberInfo as FieldInfo).FieldType;
+            else if (memberInfo is PropertyInfo)
+                memberType = (memberInfo as PropertyInfo).PropertyType;
+            else
+                return;
+
+            if (types.Contains(memberType))
+                return;
+           
+            if (memberType.GetFields().Any(f => f.IsPublic && !f.IsStatic))
+                GenerateCode_ObjectToStringClass(sb, memberType);
+            else if (memberType.GetProperties().Any(p => p.CanRead))
+                GenerateCode_ObjectToStringClass(sb, memberType);
+
+            types.Add(memberType);
         }
-        private static void GenerateCode_ObjectToString(StringBuilder sb, Type type)
+
+        private static void GenerateCode_ObjectToStringMethord(StringBuilder sb, Type type)
         {
-            sb.AppendLine(string.Format("public static string ObjectToString({0} obj)", type.FullName.Replace("+",".")));
+            sb.AppendLine(string.Format("public static string ObjectToString({0} obj)", type.FullName.Replace("+", ".")));
             sb.AppendLine("{");//method start
 
             sb.AppendLine("StringBuilder sb=new StringBuilder();");
-            sb.AppendLine(string.Format ("sb.AppendLine(\"[{0}]\");",type.FullName));
-            foreach (var field in type.GetFields())
+            sb.AppendLine(string.Format("sb.AppendLine(\"[{0}]\");", GetTypeNameStr(type)));
+
+            if (type.IsArray)
             {
-                if (field.IsStatic || !field.IsPublic)
-                    // don't process static fields
-                    continue;
-                var fieldType = field.FieldType;
-                if (fieldType == typeof(string))
+                Type elementType = type.GetElementType();
+                GenerateCode_ArrayMemberToString(sb, elementType);
+            }
+            else if (type.IsGenericType)
+            {
+                if (type.Name == "List`1")
                 {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", field.Name));
-                }
-                else if (
-                    fieldType == typeof(Int16)
-                    || fieldType == typeof(Int32)
-                    || fieldType == typeof(Int64)
-                    || fieldType == typeof(UInt16)
-                    || fieldType == typeof(UInt32)
-                    || fieldType == typeof(UInt64)
-                    || fieldType == typeof(float)
-                    || fieldType == typeof(Double)
-                    || fieldType == typeof(Decimal)
-                    || fieldType == typeof(Boolean)
-                    || fieldType == typeof(Char)
-                    )
-                {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", field.Name));
-                }
-                else if (fieldType.IsEnum)
-                {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", field.Name));
+                    Type elementType = type.GetGenericArguments().First();
+                    GenerateCode_ArrayMemberToString(sb, elementType);
                 }
                 else
                 {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",{1}.ObjectToString(obj.{0})));", field.Name, GenerateObjectToStringClassName(fieldType)));
-
+                    throw new Exception(string.Format("暂不支持对该类型的处理:{0}", type.FullName));
                 }
             }
-
-            foreach (var property in type.GetProperties())
+            else
             {
-                if (!property.CanRead)
-                    // don't process static fields
-                    continue;
-                var propertyType = property.PropertyType;
-
-                if (propertyType == typeof(string))
+                foreach (var field in type.GetFields())
                 {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", property.Name));
+                    if (field.IsStatic || !field.IsPublic)
+                        // don't process static fields
+                        continue;
+                    GenerateCode_MemberInfoToString(sb, field);
                 }
-                else if (
-                    propertyType == typeof(Int16)
-                    || propertyType == typeof(Int32)
-                    || propertyType == typeof(Int64)
-                    || propertyType == typeof(UInt16)
-                    || propertyType == typeof(UInt32)
-                    || propertyType == typeof(UInt64)
-                    || propertyType == typeof(float)
-                    || propertyType == typeof(Double)
-                    || propertyType == typeof(Decimal)
-                    || propertyType == typeof(Boolean)
-                    || propertyType == typeof(Char)
-                    )
+                foreach (var property in type.GetProperties())
                 {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", property.Name));
-                }
-                else if (propertyType.IsEnum)
-                {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", property.Name));
-                }
-                else
-                {
-                    sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",{1}.ObjectToString(obj.{0})));", property.Name, GenerateObjectToStringClassName(propertyType)));
-
+                    if (!property.CanRead)
+                        // don't process static fields
+                        continue;
+                    GenerateCode_MemberInfoToString(sb, property);
                 }
             }
-
 
 
             sb.AppendLine("return sb.ToString();");
@@ -198,14 +233,137 @@ namespace QuotV5
             sb.AppendLine("}");//method end
         }
 
-      
+        private static void GenerateCode_ArrayMemberToString(StringBuilder sb, Type elementType)
+        {
+
+
+            sb.AppendLine("if(obj!=null)");
+            sb.AppendLine("{");//if start
+            sb.AppendLine("foreach(var item in obj)");
+            sb.AppendLine("{");//foreach start
+
+
+            if (elementType == typeof(string))
+            {
+                sb.AppendLine(string.Format("if(item!=null)"));
+                sb.AppendLine(string.Format("sb.AppendLine(item);"));
+                sb.AppendLine(string.Format("else"));
+                sb.AppendLine(string.Format("sb.AppendLine();"));
+            }
+            else if (
+                elementType == typeof(Int16)
+                || elementType == typeof(Int32)
+                || elementType == typeof(Int64)
+                || elementType == typeof(UInt16)
+                || elementType == typeof(UInt32)
+                || elementType == typeof(UInt64)
+                || elementType == typeof(float)
+                || elementType == typeof(Double)
+                || elementType == typeof(Decimal)
+                || elementType == typeof(Boolean)
+                || elementType == typeof(Char)
+                )
+            {
+                sb.AppendLine(string.Format("sb.AppendLine(item.ToString());"));
+            }
+            else if (elementType.IsEnum)
+            {
+                sb.AppendLine(string.Format("sb.AppendLine(item.ToString());"));
+            }
+            else
+            {
+                sb.AppendLine(string.Format("sb.AppendLine({0}.ObjectToString(item));", GenerateObjectToStringClassName(elementType)));
+            }
+
+            sb.AppendLine("}");//foreach end
+            sb.AppendLine("}");//if end
+        }
+
+        private static void GenerateCode_MemberInfoToString(StringBuilder sb, MemberInfo memberInfo)
+        {
+
+            string memberName;
+            Type memberType;
+            if (memberInfo is FieldInfo)
+            {
+                FieldInfo fi = memberInfo as FieldInfo;
+                memberName = fi.Name;
+                memberType = fi.FieldType;
+            }
+            else if (memberInfo is PropertyInfo)
+            {
+                PropertyInfo pi = memberInfo as PropertyInfo;
+                memberName = pi.Name;
+                memberType = pi.PropertyType;
+            }
+            else
+                return;
+            if (memberType == typeof(string))
+            {
+                sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", memberName));
+            }
+            else if (
+                memberType == typeof(Int16)
+                || memberType == typeof(Int32)
+                || memberType == typeof(Int64)
+                || memberType == typeof(UInt16)
+                || memberType == typeof(UInt32)
+                || memberType == typeof(UInt64)
+                || memberType == typeof(float)
+                || memberType == typeof(Double)
+                || memberType == typeof(Decimal)
+                || memberType == typeof(Boolean)
+                || memberType == typeof(Char)
+                )
+            {
+                sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", memberName));
+            }
+            else if (memberType.IsEnum)
+            {
+                sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", memberName));
+            }
+            else
+            {
+                sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",{1}.ObjectToString(obj.{0})));", memberName, GenerateObjectToStringClassName(memberType)));
+            }
+        }
+
+
+        private static string GenerateObjectToStringClassName(Type type)
+        {
+            return "ObjectToString_" + GetTypeNameStr(type);
+        }
+
+        private static string GetTypeNameStr(Type type)
+        {
+            if (type.IsArray)
+            {
+                Type elementType = type.GetElementType();
+                return string.Format("{0}_Array", GetTypeNameStr(elementType));
+            }
+            else if (type.IsGenericType)
+            {
+                if (type.Name == "List`1")
+                {
+                    Type elementType = type.GetGenericArguments().First();
+                    return string.Format("{0}_List", GetTypeNameStr(elementType));
+                }
+                else
+                {
+                    throw new Exception(string.Format("暂不支持对该类型的处理:{0}", type.FullName));
+                }
+            }
+            else
+            {
+                return type.FullName.Replace(".", "_").Replace("+", "__"); ;
+            }
+        }
         #endregion
 
         public static string ObjectToString(T obj)
         {
             return structToStringExecutor.Execute(null, new object[] { obj }) as string;
         }
-        
-       
+
     }
 }

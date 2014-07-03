@@ -20,8 +20,5 @@ namespace QuotV5.Binary
         public const string SellSummary = "x4";
         public const string PriceEarningRatio1 = "x5";
         public const string PriceEarningRatio2 = "x6";
-
-
-
     }
 }

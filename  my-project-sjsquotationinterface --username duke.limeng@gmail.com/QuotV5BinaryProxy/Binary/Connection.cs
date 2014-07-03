@@ -595,6 +595,11 @@ namespace QuotV5.Binary
                 marketData = QuotSnap300111.Deserialize(msg.BodyData);
                 logMarketData<QuotSnap300111>(marketData as QuotSnap300111);
             }
+            else if (msg.Header.Type == (uint)MsgType.IndexQuotationSnap)
+            {
+                marketData = QuotSnap309011.Deserialize(msg.BodyData);
+                logMarketData<QuotSnap309011>(marketData as QuotSnap309011);
+            }
             else if (msg.Header.Type == (uint)MsgType.Order)
             {
                 marketData = Order300192.Deserialize(msg.BodyData);

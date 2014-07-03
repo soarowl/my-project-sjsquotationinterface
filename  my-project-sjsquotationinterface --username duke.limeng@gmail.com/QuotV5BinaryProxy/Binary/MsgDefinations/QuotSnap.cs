@@ -120,9 +120,9 @@ namespace QuotV5.Binary
         private static int orderSize = Marshal.SizeOf(typeof(Order));
 
         #region 结构定义
-        public UInt32 NoMDEntries { get; private set; }
+        public UInt32 NoMDEntries { get;  set; }
 
-        public MDEntry[] MDEntries { get; private set; }
+        public MDEntry[] MDEntries { get;  set; }
 
 
         public class MDEntry
@@ -387,9 +387,9 @@ namespace QuotV5.Binary
     {
         protected static int commonInfoSize = Marshal.SizeOf(typeof(QuotSnapCommonInfo));
 
-        public QuotSnapCommonInfo CommonInfo { get; protected set; }
+        public QuotSnapCommonInfo CommonInfo { get;  set; }
 
-        public TExtInfo ExtInfo { get; private set; }
+        public TExtInfo ExtInfo { get;  set; }
 
         
         public static TQuotSnap Deserialize(byte[] bytes)

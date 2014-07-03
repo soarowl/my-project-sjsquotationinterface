@@ -12,10 +12,11 @@ namespace V5Test
         static Log4cb.ILog4cbHelper logHelper = new Log4cb.Log4cbHelper("V5");
         static void Main(string[] args)
         {
+            //testObjToString();
             testRealtimeQuotConn();
             // testStaticInfo_Index();
             //testStaticInfo_Security();
-          //  testStaticInfo_CashAuctionParams();
+            //  testStaticInfo_CashAuctionParams();
             //testStaticInfo_DerivativeAuctionParams();
             //testFastReflection();
             //testObjectCreator();
@@ -37,6 +38,26 @@ namespace V5Test
 
 
             Console.Read();
+        }
+
+        private static void testObjToString()
+        {
+            QuotV5.Binary.QuotSnap300111 quotSnap = new QuotV5.Binary.QuotSnap300111()
+            {
+                CommonInfo = new QuotV5.Binary.QuotSnapCommonInfo() { ChannelNo = 1, MDStreamID = "3" },
+
+                ExtInfo = new QuotV5.Binary.QuotSnapExtInfo300111()
+                {
+                    NoMDEntries = 5,
+                    MDEntries = new QuotV5.Binary.QuotSnapExtInfo300111.MDEntry[]{
+                new  QuotV5.Binary.QuotSnapExtInfo300111.MDEntry(){ Entry =new QuotV5.Binary.QuotSnapExtInfo300111.MDEntryWithoutOrders (){ MDEntryPx=3, MDEntrySize =5, NoOrders =1},Orders =new  QuotV5.Binary.QuotSnapExtInfo300111.Order[]{new  QuotV5.Binary.QuotSnapExtInfo300111.Order(){ OrderQty =1212},new  QuotV5.Binary.QuotSnapExtInfo300111.Order(){OrderQty =1212} } },
+                 new  QuotV5.Binary.QuotSnapExtInfo300111.MDEntry(){ Entry =new QuotV5.Binary.QuotSnapExtInfo300111.MDEntryWithoutOrders (){ MDEntryPx=3, MDEntrySize =5, NoOrders =1},Orders =new  QuotV5.Binary.QuotSnapExtInfo300111.Order[]{new  QuotV5.Binary.QuotSnapExtInfo300111.Order(){ OrderQty =1212},new  QuotV5.Binary.QuotSnapExtInfo300111.Order(){OrderQty =1213} } },
+             new  QuotV5.Binary.QuotSnapExtInfo300111.MDEntry(){ Entry =new QuotV5.Binary.QuotSnapExtInfo300111.MDEntryWithoutOrders (){ MDEntryPx=3, MDEntrySize =5, NoOrders =1},Orders =new  QuotV5.Binary.QuotSnapExtInfo300111.Order[]{new  QuotV5.Binary.QuotSnapExtInfo300111.Order(){ OrderQty =1212},new  QuotV5.Binary.QuotSnapExtInfo300111.Order(){OrderQty =1214} } }
+                }
+                }
+
+            };
+            string str = QuotV5.ObjectLogHelper<QuotV5.Binary.QuotSnap300111>.ObjectToString(quotSnap);
         }
 
         private static void testAddList()
@@ -206,7 +227,7 @@ namespace V5Test
             {
                 logHelper.LogInfoMsg("收到QuotSnap300111");
             }
-            
+
         }
 
 
