@@ -156,11 +156,11 @@ namespace MDS.Plugin.StockV5
                 stkIdPrefix = status.Status.SecurityPreName,
 
 
-                newPrice = 0,
-                highPrice = 0,
-                lowPrice = 0,
-                maxOrderPrice = 0,
-                minOrderPrice = 0,
+                //newPrice = 0,
+                //highPrice = 0,
+                //lowPrice = 0,
+                //maxOrderPrice = 0,
+                //minOrderPrice = 0,
                 aggPriceLimit = 0,
                 contPriceLimit = 0,
                 priceLimitFlag = default(char),
@@ -224,7 +224,13 @@ namespace MDS.Plugin.StockV5
 
 
 
-
+        /// <summary>
+        /// 构建股票的行情信息
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="quotSnap"></param>
+        /// <param name="securityInfo"></param>
+        /// <returns></returns>
         private QuotationInfo ConstructQuotationInfo(
             QuotV5.Binary.RealtimeStatus status,
             QuotV5.Binary.QuotSnap300111 quotSnap,
@@ -270,7 +276,7 @@ namespace MDS.Plugin.StockV5
                 sellQty4 = 0,
                 sellQty5 = 0,
                 #endregion
-                closeFlag = false,
+                closeFlag = default(char),
                 change = 0,
                 changePercent = 0,
                 #endregion
@@ -282,7 +288,7 @@ namespace MDS.Plugin.StockV5
 
 
 
-            SetBidAsks(rtn, quotSnap.ExtInfo.MDEntries);
+            ;
             return rtn;
         }
 
@@ -306,6 +312,8 @@ namespace MDS.Plugin.StockV5
                 stkName = securityInfo.Symbol,
                 knockQty = quotSnap.CommonInfo.TotalVolumeTrade,
                 knockMoney = quotSnap.CommonInfo.TotalValueTrade,
+                stkIdPrefix = status.Status.SecurityPreName,
+                tradeTimeFlag = quotSnap.CommonInfo.TradingPhaseCode,
 
 
 
@@ -317,6 +325,9 @@ namespace MDS.Plugin.StockV5
                 highPrice = 0,
                 lowPrice = 0,
                 newPrice = 0,
+                IOPV = 0,
+                maxOrderPrice = 0,
+                minOrderPrice = 0,
 
                 #region 盘口
                 buyPrice1 = 0,
@@ -344,7 +355,10 @@ namespace MDS.Plugin.StockV5
                 #endregion
 
                 #region 稍后赋值的字段
-                closeFlag = false,
+                passCreditCashStk = default(char),
+                passCreditShareStk = default(char),
+                pauseTradeStatus = false,
+                closeFlag = default(char),
                 change = 0,
                 changePercent = 0,
                 closeIndex = 0,
@@ -352,6 +366,15 @@ namespace MDS.Plugin.StockV5
                 highIndex = 0,
                 lowIndex = 0,
                 newIndex = 0,
+
+
+                SendTime = 0,
+                ReceiveTime = 0,
+                #endregion
+
+                #region 无法获取的字段
+                levelFlag = null,
+                otherBusinessMark = null,
                 #endregion
             };
 
@@ -363,10 +386,183 @@ namespace MDS.Plugin.StockV5
             return rtn;
         }
 
-        private void SetBidAsks(QuotationInfo quotInfo, IEnumerable<QuotV5.Binary.QuotSnapExtInfo300111.MDEntry> mdEntries)
-        {
 
+
+        private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.StaticInfo.IndexInfo securityInfo)
+        {
+            quotInfo.stkId = securityInfo.SecurityID;
+            quotInfo.stkName = securityInfo.Symbol;
         }
+
+        private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.StaticInfo.StockSecurityInfo securityInfo)
+        {
+            quotInfo.stkId = securityInfo.CommonInfo.SecurityID;
+            quotInfo.stkName = securityInfo.CommonInfo.Symbol;
+        }
+
+        private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.Binary.RealtimeStatus status)
+        {
+            quotInfo.stkIdPrefix = status.Status.SecurityPreName;
+            if (!string.IsNullOrEmpty(status.Status.SecurityPreName))
+            {
+                quotInfo.closeFlag = status.Status.SecurityPreName.FirstOrDefault();
+
+                if (status.Status.SecurityPreName.Length > 1)
+                {
+                    quotInfo.passCreditCashStk = status.Status.SecurityPreName.Skip(1).Take(1).First();
+                    quotInfo.passCreditShareStk = quotInfo.passCreditCashStk;
+                }
+            }
+        }
+
+        private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.Binary.QuotSnap309011 quotSnap)
+        {
+            SetQuotInfoProperty(quotInfo, quotSnap.CommonInfo);
+            if (quotSnap.ExtInfo != null && quotSnap.ExtInfo.MDEntries != null && quotSnap.ExtInfo.MDEntries.Length > 0)
+            {
+                decimal d = 1000000;
+                foreach (var mdEntry in quotSnap.ExtInfo.MDEntries)
+                {
+                    if (mdEntry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo309011.MDEntryType.NewIndex)
+                    {
+                        quotInfo.newIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo309011.MDEntryType.OpenIndex)
+                    {
+                        quotInfo.openIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo309011.MDEntryType.CloseIndex)
+                    {
+                        quotInfo.closeIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo309011.MDEntryType.HighIndex)
+                    {
+                        quotInfo.highIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo309011.MDEntryType.LowIndex)
+                    {
+                        quotInfo.lowIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                }
+            }
+            quotInfo.change = quotInfo.newIndex - quotInfo.closeIndex;
+            if (quotInfo.closeIndex != 0.0m)
+                quotInfo.changePercent = quotInfo.change / quotInfo.closeIndex;
+        }
+
+        private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.Binary.QuotSnap300111 quotSnap)
+        {
+            SetQuotInfoProperty(quotInfo, quotSnap.CommonInfo);
+            if (quotSnap.ExtInfo != null && quotSnap.ExtInfo.MDEntries != null && quotSnap.ExtInfo.MDEntries.Length > 0)
+            {
+                decimal d = 1000000;
+                foreach (var mdEntry in quotSnap.ExtInfo.MDEntries)
+                {
+                    if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.BuyPrice)
+                    {
+                        if (mdEntry.Entry.MDPriceLevel == 1)
+                            quotInfo.buyPrice1 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 2)
+                            quotInfo.buyPrice2 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 3)
+                            quotInfo.buyPrice3 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 4)
+                            quotInfo.buyPrice4 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 5)
+                            quotInfo.buyPrice5 = (decimal)mdEntry.Entry.MDEntryPx / d;
+
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.BuySummary)
+                    {
+                        //  quotInfo.openIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.Diff1)
+                    {
+                        //  quotInfo.closeIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.Diff2)
+                    {
+                        //  quotInfo.highIndex = (decimal)mdEntry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.HighPrice)
+                    {
+                        quotInfo.highPrice = (decimal)mdEntry.Entry.MDEntryPx / d;
+
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.KnockPrice)
+                    {
+                        quotInfo.knockMoney = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.LowPrice)
+                    {
+                        quotInfo.lowPrice = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.OpenPrice)
+                    {
+                        quotInfo.openPrice = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+                 
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.SellPrice)
+                    {
+                        if (mdEntry.Entry.MDPriceLevel == 1)
+                            quotInfo.sellPrice1 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 2)
+                            quotInfo.sellPrice2 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 3)
+                            quotInfo.sellPrice3 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 4)
+                            quotInfo.sellPrice4 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                        else if (mdEntry.Entry.MDPriceLevel == 5)
+                            quotInfo.sellPrice5 = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.MaxOrderPrice)
+                    {
+                        quotInfo.maxOrderPrice = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.MinOrderPrice)
+                    {
+                        quotInfo.minOrderPrice = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.IOPV)
+                    {
+                        quotInfo.IOPV = (decimal)mdEntry.Entry.MDEntryPx / d;
+                    }
+
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.SellSummary)
+                    {
+
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.SettlePrice)
+                    {
+
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.PriceEarningRatio1)
+                    {
+                        
+                    }
+                    else if (mdEntry.Entry.MDEntryType == QuotV5.Binary.QuotSnapExtInfo300111.MDEntryType.PriceEarningRatio2)
+                    {
+                        
+                    }
+                }
+            }
+
+            quotInfo.change = quotInfo.newPrice - quotInfo.closePrice;
+            if (quotInfo.closePrice != 0.0m)
+                quotInfo.changePercent = quotInfo.change / quotInfo.closePrice;
+        }
+
+        private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.Binary.QuotSnapCommonInfo quotSnapCommonInfo)
+        {
+            quotInfo.knockQty = quotSnapCommonInfo.TotalVolumeTrade;
+            quotInfo.knockMoney = quotSnapCommonInfo.TotalValueTrade;
+            quotInfo.tradeTimeFlag = quotSnapCommonInfo.TradingPhaseCode;
+            quotInfo.closePrice = (decimal)quotSnapCommonInfo.PrevClosePx / 10000;
+            quotInfo.changeTime = quotSnapCommonInfo.OrigTime;
+        }
+
+    
     }
 
 

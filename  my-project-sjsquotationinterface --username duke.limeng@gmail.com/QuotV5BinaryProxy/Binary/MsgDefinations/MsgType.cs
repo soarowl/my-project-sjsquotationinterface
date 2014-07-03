@@ -32,18 +32,9 @@ namespace QuotV5.Binary
         /// </summary>
         QuotationSnap=300111,
         /// <summary>
-        /// 逐笔委托
+        /// 盘后定价大宗交易业务行情快照
         /// </summary>
-        Order=300192,
-        /// <summary>
-        /// 逐笔成交
-        /// </summary>
-        Tick=300191,
-        /// <summary>
-        /// 以收盘价交易的盘后定价大宗交易申报
-        /// 以成交量加权平均价交易的盘后定价大宗交易申报
-        /// </summary>
-        BlockTradingOrders=300611,
+        BlockTradingQuotationSnap = 300611,
         /// <summary>
         /// 指数行情
         /// </summary>
@@ -51,6 +42,23 @@ namespace QuotV5.Binary
         /// <summary>
         /// 成交量统计指标
         /// </summary>
-        TradingVolumeStatisticalIndicator=309111
+        TradingVolumeStatisticalIndicator=309111,
+        /// <summary>
+        /// 逐笔委托
+        /// </summary>
+        Order=300192,
+        /// <summary>
+        /// 协议交易业务逐笔委托行情
+        /// </summary>
+        AgreementOrder=300592,
+        /// <summary>
+        /// 转融通证券出借业务逐笔委托行情
+        /// </summary>
+       RefinanceOrder=300792, 
+        /// <summary>
+        /// 逐笔成交
+        /// </summary>
+        Tick=300191
+
     }
 }

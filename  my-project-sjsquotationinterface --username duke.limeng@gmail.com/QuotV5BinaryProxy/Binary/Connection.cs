@@ -15,6 +15,8 @@ namespace QuotV5.Binary
         protected Log4cb.ILog4cbHelper logHelper;
         protected object connSyncObj = new object();
         protected static int tailSize = Marshal.SizeOf(typeof(Trailer));
+        
+
         /// <summary>
         /// 消息包头长度
         /// </summary>
@@ -631,6 +633,7 @@ namespace QuotV5.Binary
 
     public class ResendQuotConnection : ConnectionBase
     {
+
         public ResendQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
             : base(config, logHelper)
         {

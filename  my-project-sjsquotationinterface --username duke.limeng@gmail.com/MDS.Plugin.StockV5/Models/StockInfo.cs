@@ -92,15 +92,15 @@ namespace MDS.Plugin.StockV5
         /// </summary>
         public char priceLimitFlag;
 
-        /// <summary>
-        /// 涨停价格
-        /// </summary>
-        public double maxOrderPrice;
+        ///// <summary>
+        ///// 涨停价格
+        ///// </summary>
+        //public double maxOrderPrice;
 
-        /// <summary>
-        /// 跌停价格
-        /// </summary>
-        public double minOrderPrice;
+        ///// <summary>
+        ///// 跌停价格
+        ///// </summary>
+        //public double minOrderPrice;
 
         /// <summary>
         /// 折合比例
@@ -257,19 +257,19 @@ namespace MDS.Plugin.StockV5
         /// </summary>
         public string exchMemo;
 
-        /// <summary>
-        /// 当前价
-        /// </summary>
-        public double newPrice;
+        ///// <summary>
+        ///// 当前价
+        ///// </summary>
+        //public double newPrice;
 
-        /// <summary>
-        /// 最高价
-        /// </summary>
-        public double highPrice;
+        ///// <summary>
+        ///// 最高价
+        ///// </summary>
+        //public double highPrice;
         
-        /// <summary>
-        /// 最低价
-        /// </summary>
-        public double lowPrice;
+        ///// <summary>
+        ///// 最低价
+        ///// </summary>
+        //public double lowPrice;
     }
 }

@@ -40,6 +40,9 @@
     <Reference Include="ServiceManager">
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceManager.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Interfaces">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Kernel\Bins\Release\ServiceStack.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Redis, Version=3.9.42.0, Culture=neutral, PublicKeyToken=e5d70ba0f6fb5d22, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Kernel\Bins\Release\ServiceStack.Redis.dll</HintPath>

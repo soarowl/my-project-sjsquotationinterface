@@ -71,7 +71,6 @@
     <Compile Include="Binary\MsgDefinations\IMessage.cs" />
     <Compile Include="Binary\MsgDefinations\Logon.cs" />
     <Compile Include="Binary\MsgDefinations\Logout.cs" />
-    <Compile Include="Binary\MsgDefinations\MDEntryType.cs" />
     <Compile Include="Binary\MsgDefinations\MessagePack.cs" />
     <Compile Include="Binary\MsgDefinations\MsgConsts.cs" />
     <Compile Include="Binary\MsgDefinations\MsgType.cs" />

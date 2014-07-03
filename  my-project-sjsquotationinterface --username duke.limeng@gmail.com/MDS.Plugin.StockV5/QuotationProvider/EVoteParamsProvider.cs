@@ -8,6 +8,8 @@ namespace MDS.Plugin.StockV5
 {
     public class EVoteParamsProvider :StaticInfoProvider<QuotV5.StaticInfo.EVoteParams>
     {
+        public EVoteParamsProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
+
         QuotV5.StaticInfo.EVoteParamsParser parser = new QuotV5.StaticInfo.EVoteParamsParser();
         protected override void OnScanData()
         {

@@ -9,6 +9,7 @@ namespace MDS.Plugin.StockV5
 
     public class CashAuctionParamsProvider : StaticInfoProvider<QuotV5.StaticInfo.CashAuctionParams>
     {
+        public CashAuctionParamsProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
         QuotV5.StaticInfo.CashAuctionParamsParser parser = new QuotV5.StaticInfo.CashAuctionParamsParser();
         protected override void OnScanData()
         {

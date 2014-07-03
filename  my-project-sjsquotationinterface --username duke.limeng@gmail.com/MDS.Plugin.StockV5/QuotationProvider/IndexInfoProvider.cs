@@ -8,6 +8,8 @@ namespace MDS.Plugin.StockV5
 {
     public class IndexInfoProvider:StaticInfoProvider<QuotV5.StaticInfo.IndexInfo>
     {
+        public IndexInfoProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
+
         QuotV5.StaticInfo.IndexInfoParser parser = new QuotV5.StaticInfo.IndexInfoParser();
         protected override void OnScanData()
         {

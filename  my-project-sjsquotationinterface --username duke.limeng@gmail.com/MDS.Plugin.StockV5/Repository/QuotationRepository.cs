@@ -78,5 +78,15 @@ namespace MDS.Plugin.StockV5
             QuotationPublisher.Publisher.Publish(key, quotInfoBytes);
 
         }
+
+        public void ClearAllBasicInfo()
+        { 
+
+        }
+
+        public void ClearAllQuotInfo()
+        { 
+        
+        }
     }
 }

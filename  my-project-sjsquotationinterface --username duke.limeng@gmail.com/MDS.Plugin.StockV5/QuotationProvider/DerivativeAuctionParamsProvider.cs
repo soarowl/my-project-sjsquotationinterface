@@ -8,6 +8,8 @@ namespace MDS.Plugin.StockV5
 {
     public class DerivativeAuctionParamsProvider : StaticInfoProvider<QuotV5.StaticInfo.DerivativeAuctionParams>
     {
+        public DerivativeAuctionParamsProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
+
         QuotV5.StaticInfo.DerivativeAuctionParamsParser parser = new QuotV5.StaticInfo.DerivativeAuctionParamsParser();
         protected override void OnScanData()
         {

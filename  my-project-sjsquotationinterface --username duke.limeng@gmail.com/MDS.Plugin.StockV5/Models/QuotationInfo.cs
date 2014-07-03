@@ -35,7 +35,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 停牌标志
         /// </summary>
-        public bool closeFlag;
+        public char closeFlag;
 
         /// <summary>
         /// 昨收价
@@ -45,7 +45,7 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 今开价
         /// </summary>
-        public double openPrice;
+        public decimal openPrice;
 
         /// <summary>
         /// 当前价
@@ -55,12 +55,12 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 最高价
         /// </summary>
-        public double highPrice;
+        public decimal highPrice;
 
         /// <summary>
         /// 最低价
         /// </summary>
-        public double lowPrice;
+        public decimal lowPrice;
 
         /// <summary>
         /// 成交量
@@ -72,17 +72,17 @@ namespace MDS.Plugin.StockV5
         /// </summary>
         public decimal knockMoney;
 
-        public double buyPrice1;
-        public double buyPrice2;
-        public double buyPrice3;
-        public double buyPrice4;
-        public double buyPrice5;
+        public decimal buyPrice1;
+        public decimal buyPrice2;
+        public decimal buyPrice3;
+        public decimal buyPrice4;
+        public decimal buyPrice5;
 
-        public double sellPrice1;
-        public double sellPrice2;
-        public double sellPrice3;
-        public double sellPrice4;
-        public double sellPrice5;
+        public decimal sellPrice1;
+        public decimal sellPrice2;
+        public decimal sellPrice3;
+        public decimal sellPrice4;
+        public decimal sellPrice5;
 
         public Int64 buyQty1;
         public Int64 buyQty2;
@@ -99,17 +99,17 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 基金净值
         /// </summary>
-        public double IOPV;
+        public decimal IOPV;
 
         /// <summary>
         /// 涨停价格
         /// </summary>
-        public double maxOrderPrice;
+        public decimal maxOrderPrice;
 
         /// <summary>
         /// 跌停价格
         /// </summary>
-        public double minOrderPrice;
+        public decimal minOrderPrice;
 
         /// <summary>
         /// 产品交易阶段
@@ -156,23 +156,28 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// 今开指数
         /// </summary>
-        public double openIndex;
+        public decimal openIndex;
 
         /// <summary>
         /// 最高指数
         /// </summary>
-        public double highIndex;
+        public decimal highIndex;
 
         /// <summary>
         /// 最低指数
         /// </summary>
-        public double lowIndex;
+        public decimal lowIndex;
+
+        /// <summary>
+        /// 最新指数
+        /// </summary>
+        public decimal newIndex;
 
         /// <summary>
         /// 行情时间
         /// </summary>
-        public decimal newIndex;
-
+        public Int64 changeTime;
+        
         /// <summary>
         /// MDS 收到行情的时间
         /// </summary>

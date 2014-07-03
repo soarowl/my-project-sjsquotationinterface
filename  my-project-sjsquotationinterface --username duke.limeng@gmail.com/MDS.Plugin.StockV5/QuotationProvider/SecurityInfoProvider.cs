@@ -10,6 +10,7 @@ namespace MDS.Plugin.StockV5
 
     public class SecurityInfoProvider : StaticInfoProvider<QuotV5.StaticInfo.SecurityInfoBase>
     {
+        public SecurityInfoProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
         QuotV5.StaticInfo.SecurityInfoParser parser = new QuotV5.StaticInfo.SecurityInfoParser();
         protected override void OnScanData()
         {

@@ -188,6 +188,27 @@ namespace QuotV5.Binary
             public Int64 OrderQty;
         }
 
+        public class MDEntryType
+        {
+            public const string BuyPrice = "0";
+            public const string SellPrice = "1";
+            public const string KnockPrice = "2";
+            public const string OpenPrice = "4";
+            public const string SettlePrice = "6";
+            public const string HighPrice = "7";
+            public const string LowPrice = "8";
+            public const string Diff1 = "x1";
+            public const string Diff2 = "x2";
+            public const string BuySummary = "x3";
+            public const string SellSummary = "x4";
+            public const string PriceEarningRatio1 = "x5";
+            public const string PriceEarningRatio2 = "x6";
+            public const string X7 = "x7";
+            public const string IOPV = "x8";
+            public const string X9 = "x9";
+            public const string MaxOrderPrice = "xe";
+            public const string MinOrderPrice = "xf";
+        }
         #endregion
 
         protected override QuotSnapExtInfo300111 deserialize(byte[] bytes)
@@ -268,7 +289,14 @@ namespace QuotV5.Binary
             /// </summary>
             public Int64 MDEntryPx;
         }
-
+        public class MDEntryType
+        {
+            public const string NewIndex = "3";
+            public const string CloseIndex = "xa";
+            public const string OpenIndex = "xb";
+            public const string HighIndex = "xc";
+            public const string LowIndex = "xd";
+        }
         #endregion
 
         protected override QuotSnapExtInfo309011 deserialize(byte[] bytes)

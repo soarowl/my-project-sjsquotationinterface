@@ -8,6 +8,8 @@ namespace MDS.Plugin.StockV5
 {
     public class NegotiationParamsProvider:StaticInfoProvider<QuotV5.StaticInfo.NegotiationParams>
     {
+        public NegotiationParamsProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
+
         QuotV5.StaticInfo.NegotiationParamsParser parser = new QuotV5.StaticInfo.NegotiationParamsParser();
         protected override void OnScanData()
         {

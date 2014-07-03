@@ -85,7 +85,7 @@ namespace MDS.Plugin.StockV5
                     if (lastStartTime.HasValue)
                     {
                         TimeSpan sinceLastScan = DateTime.Now - lastStartTime.Value;
-                        this.logHelper.LogPerformaceMsg(Log4cbType.LogFileOnly, "读取并处理{0}总耗时{1}ms", this.config.PathFormat,, sinceLastScan.TotalMilliseconds);
+                        this.logHelper.LogPerformaceMsg(Log4cbType.LogFileOnly, "读取并处理{0}总耗时{1}ms", this.config.PathFormat, sinceLastScan.TotalMilliseconds);
 
                         waitMS = this.config.ScanInterval.TotalMilliseconds - sinceLastScan.TotalMilliseconds;
                         if (waitMS < 0)
@@ -97,7 +97,7 @@ namespace MDS.Plugin.StockV5
                     //停止事件发生,退出发送线程
                     if (index == 0)
                     {
-                        this.logHelper.LogInfoMsg("{0}的Provider正常退出", this.config.PathFormat,);
+                        this.logHelper.LogInfoMsg("{0}的Provider正常退出", this.config.PathFormat);
                         break;
                     }
                     lastStartTime = DateTime.Now;
