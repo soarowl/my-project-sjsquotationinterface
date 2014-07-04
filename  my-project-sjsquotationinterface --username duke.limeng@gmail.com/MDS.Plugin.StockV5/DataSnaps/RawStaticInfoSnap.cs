@@ -17,5 +17,17 @@ namespace MDS.Plugin.StockV5
         public static readonly ConcurrentDictionary<string, QuotV5.StaticInfo.DerivativeAuctionParams> DerivativeAuctionParams = new ConcurrentDictionary<string, QuotV5.StaticInfo.DerivativeAuctionParams>();
 
         public static readonly ConcurrentDictionary<string, QuotV5.StaticInfo.NegotiationParams> NegotiationParams = new ConcurrentDictionary<string, QuotV5.StaticInfo.NegotiationParams>();
+
+        public static readonly ConcurrentDictionary<string, QuotV5.StaticInfo.SecurityCloseMD> SecurityCloseMD = new ConcurrentDictionary<string, QuotV5.StaticInfo.SecurityCloseMD>();
+
+        public static void ClearAll()
+        {
+            SecurityInfo.Clear();
+            IndexInfo.Clear();
+            CashAuctionParams.Clear();
+            DerivativeAuctionParams.Clear();
+            NegotiationParams.Clear(); 
+            SecurityCloseMD.Clear();
+        }
     }
 }

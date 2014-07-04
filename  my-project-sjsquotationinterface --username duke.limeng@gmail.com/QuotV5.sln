@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "V5Test", "V5Test\V5Test.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{67939BAB-4713-450C-8163-BA7EE6BFA60B}"
 	ProjectSection(SolutionItems) = preProject
+		Doc\ActiveMQ.txt = Doc\ActiveMQ.txt
 		Doc\vpn连接.txt = Doc\vpn连接.txt
 		Doc\深圳证券交易所Binary行情数据接口规范1.00β-修订版.pdf = Doc\深圳证券交易所Binary行情数据接口规范1.00β-修订版.pdf
 		Doc\深圳证券交易所数据文件交换接口规范1.00β-修订版.pdf = Doc\深圳证券交易所数据文件交换接口规范1.00β-修订版.pdf

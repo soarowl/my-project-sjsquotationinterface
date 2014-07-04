@@ -59,6 +59,7 @@
     <Compile Include="StaticInfo\Parsers\IndexInfoParser.cs" />
     <Compile Include="StaticInfo\Parsers\NegotiationParamsParser.cs" />
     <Compile Include="StaticInfo\Parsers\ParserBase.cs" />
+    <Compile Include="StaticInfo\Parsers\SecurityCloseMDParser.cs" />
     <Compile Include="Utils\BigEndianStructHelper.cs" />
     <Compile Include="Binary\BinaryQuotProxy.cs" />
     <Compile Include="Binary\BinaryQuotProxyConfig.cs" />

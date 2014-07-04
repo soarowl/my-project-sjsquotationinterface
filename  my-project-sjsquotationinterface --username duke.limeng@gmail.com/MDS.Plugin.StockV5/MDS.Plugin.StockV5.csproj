@@ -72,6 +72,7 @@
     <Compile Include="QuotationProvider\EVoteParamsProvider.cs" />
     <Compile Include="QuotationProvider\IndexInfoProvider.cs" />
     <Compile Include="QuotationProvider\NegotiationParamsProvider.cs" />
+    <Compile Include="QuotationProvider\SecurityCloseMDProvider.cs" />
     <Compile Include="QuotationProvider\SecurityInfoProvider.cs" />
     <Compile Include="QuotationProvider\StaticInfoProvider.cs" />
     <Compile Include="Repository\QuotationDataType.cs" />

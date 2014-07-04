@@ -5,235 +5,233 @@ using System.Text;
 
 namespace MDS.Plugin.StockV5
 {
-    public struct StockInfo
+    public class StockInfo
     {
         /// <summary>
         /// 市场代码
         /// </summary>
-        public string exchId;
+        public string exchId{get;set;}
        
         /// <summary>
         /// 证券代码
         /// </summary>
-        public string stkId;
+        public string stkId{get;set;}
         
         /// <summary>
         /// 证券名称
         /// </summary>
-        public string stkName;
+        public string stkName{get;set;}
 
         /// <summary>
         /// 英文简称
         /// </summary>
-        public string stkEnglishtAbbr;
+        public string stkEnglishtAbbr{get;set;}
         
         /// <summary>
         /// 交易单位
         /// </summary>
-        public Int16 tradeUnit;
+        public Int16 tradeUnit{get;set;}
 
         /// <summary>
         /// 行业种类
         /// </summary>
-        public string stkIndustryType;
+        public string stkIndustryType{get;set;}
         
         /// <summary>
         /// 每股面值
         /// </summary>
-        public double stkParValue;
+        public double stkParValue{get;set;}
 
         /// <summary>
         /// 流通股数
         /// </summary>
-        public Int64 totalCurrentStkQty;
+        public Int64 totalCurrentStkQty{get;set;}
         
         /// <summary>
         /// 上年利润
         /// </summary>
-        public double lastYearProfit;
+        public double lastYearProfit{get;set;}
        
         /// <summary>
         /// 本年利润
         /// </summary>
-        public double thisYearProfit;
+        public double thisYearProfit{get;set;}
        
         /// <summary>
         /// 上市日期
         /// </summary>
-        public Int64 listedDate;
+        public Int64 listedDate{get;set;}
         
         /// <summary>
         /// 到期/交割日
         /// </summary>
-        public Int64 endingDate;
+        public Int64 endingDate{get;set;}
 
         /// <summary>
         /// 买委托上限
         /// </summary>
-        public Int32 buyQtyUpperLimit;
+        public Int32 buyQtyUpperLimit{get;set;}
 
         /// <summary>
         /// 卖委托上限
         /// </summary>
-        public Int32 sellQtyUpperLimit;
+        public Int32 sellQtyUpperLimit{get;set;}
 
         /// <summary>
         /// 价格档位
         /// </summary>
-        public double orderPriceUnit;
+        public double orderPriceUnit{get;set;}
 
         /// <summary>
         /// 集合竞价限价
         /// </summary>
-        public double aggPriceLimit;
+        public double aggPriceLimit{get;set;}
 
         /// <summary>
         /// 连续竞价限价
         /// </summary>
-        public double contPriceLimit;
+        public double contPriceLimit{get;set;}
 
         /// <summary>
         /// 限价参数
         /// </summary>
-        public Int32 priceLimitFlag;
+        public Int32 priceLimitFlag{get;set;}
 
         /// <summary>
         /// 折合比例
         /// </summary>
-        public double standardConvertRate;
+        public double standardConvertRate{get;set;}
 
         /// <summary>
         /// 交易状态
         /// </summary>
-        public string tradeStatus;
+        public string tradeStatus{get;set;}
 
         /// <summary>
         /// 证券级别
         /// </summary>
-        public string stkLevel;
+        public string stkLevel{get;set;}
 
         /// <summary>
         /// 停牌标志
         /// </summary>
-        public string closeFlag;
+        public string closeFlag{get;set;}
 
         /// <summary>
         /// 除权除息标志
         /// </summary>
-        public string stkAllotFlag;
+        public string stkAllotFlag{get;set;}
 
         /// <summary>
         /// 成标志
         /// </summary>
-        public string stkIndexFlag;
+        public string stkIndexFlag{get;set;}
 
         /// <summary>
         /// 昨收价
         /// </summary>
-        public decimal closePrice;
+        public decimal closePrice{get;set;}
 
         /// <summary>
         /// 成交数量
         /// </summary>
-        public Int64 exchTotalKnockQty;
+        public Int64 exchTotalKnockQty{get;set;}
 
         /// <summary>
         /// 成交金额
         /// </summary>
-        public decimal exchTotalKnockAmt;
+        public decimal exchTotalKnockAmt{get;set;}
 
         /// <summary>
         /// 百元利息额
         /// </summary>
-        public double accuredInterest;
+        public double accuredInterest{get;set;}
 
         /// <summary>
         /// 总股本
         /// </summary>
-        public Int64 totalStkQty;
+        public Int64 totalStkQty{get;set;}
 
 
         /// <summary>
         /// 基础证券
         /// </summary>
-        public string basicStkId;
+        public string basicStkId{get;set;}
 
         /// <summary>
         /// ISIN编码
         /// </summary>
-        public string ISINCode;
+        public string ISINCode{get;set;}
 
         /// <summary>
         /// 基金份额累计净值
         /// </summary>
-        public double NAV;
+        public double NAV{get;set;}
 
         /// <summary>
         /// 债券起息日
         /// </summary>
-        public Int64 beginInterestDate;
+        public Int64 beginInterestDate{get;set;}
 
         /// <summary>
         /// 大宗交易价格上限
         /// </summary>
-        public double bulkTradingMaxPrice;
+        public double bulkTradingMaxPrice{get;set;}
 
         /// <summary>
         /// 大宗交易价格下限
         /// </summary>
-        public double bulkTradingMinPrice;
+        public double bulkTradingMinPrice{get;set;}
 
         /// <summary>
         /// 担保折扣率
         /// </summary>
-        public double CMOStandardRate;
+        public double CMOStandardRate{get;set;}
 
         /// <summary>
         /// 融资标的标志
         /// </summary>
-        public string isCreditCashStk;
+        public bool isCreditCashStk{get;set;}
 
         /// <summary>
         /// 融券标的标志
         /// </summary>
-        public string isCreditShareStk;
+        public bool isCreditShareStk{get;set;}
 
         /// <summary>
         /// 做市商标志
         /// </summary>
-        public string marketMarkerFlag;
+        public bool marketMarkerFlag{get;set;}
 
         /// <summary>
         /// 交易类型
         /// </summary>
-        public string exchTradeType;
+        public string exchTradeType{get;set;}
 
 
         /// <summary>
         /// 暂停交易标志
         /// </summary>
-        public string pauseTradeStatus;
+        public string pauseTradeStatus{get;set;}
 
         /// <summary>
         /// 融券卖出价格
         /// </summary>
-        public string creditShareSellPriceFlag;
+        public string creditShareSellPriceFlag{get;set;}
 
         /// <summary>
         /// 网络投票标志
         /// </summary>
-        public string netVoteFlag;
+        public bool netVoteFlag{get;set;}
 
         /// <summary>
         /// 其它业务状态
         /// </summary>
-        public string otherBusinessMark;
+        public string otherBusinessMark{get;set;}
 
-        /// <summary>
-        /// 备用字段
-        /// </summary>
-        public string exchMemo;
-
-
+        public StockInfo Clone()
+        {
+            return MemberwiseClone() as StockInfo;
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace QuotV5.Binary
     /// <summary>
     /// 快照行情通用信息
     /// </summary>
-     [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct QuotSnapCommonInfo
     {
         /// <summary>
@@ -85,8 +85,8 @@ namespace QuotV5.Binary
     /// 行情快照扩展信息基类
     /// </summary>
     /// <typeparam name="T"></typeparam>
-     public abstract class QuotSnapExtInfoBase<T> 
-         where T : QuotSnapExtInfoBase<T>, new()
+    public abstract class QuotSnapExtInfoBase<T>
+        where T : QuotSnapExtInfoBase<T>, new()
     {
 
         private static T instance = null;
@@ -110,7 +110,7 @@ namespace QuotV5.Binary
             }
         }
     }
-   
+
     /// <summary>
     /// 集中竞价业务行情快照扩展信息
     /// </summary>
@@ -120,9 +120,9 @@ namespace QuotV5.Binary
         private static int orderSize = Marshal.SizeOf(typeof(Order));
 
         #region 结构定义
-        public UInt32 NoMDEntries { get;  set; }
+        public UInt32 NoMDEntries { get; set; }
 
-        public MDEntry[] MDEntries { get;  set; }
+        public MDEntry[] MDEntries { get; set; }
 
 
         public class MDEntry
@@ -159,15 +159,10 @@ namespace QuotV5.Binary
             public UInt16 MDPriceLevel;
 
             /// <summary>
-            /// 由于文档匹配，这里有个未知字段
-            /// </summary>
-            public UInt32 Unknow;
-
-            /// <summary>
             /// 价位总委托笔数
             /// 为0表示不揭示
             /// </summary>
-            public UInt32 NumberOfOrders;
+            public UInt64 NumberOfOrders;
 
             /// <summary>
             /// 价位揭示委托笔数
@@ -230,7 +225,7 @@ namespace QuotV5.Binary
                     {
                         var mdEntryBytes = bytes.Skip(startIndex).Take(mdEntrySize).ToArray();
                         MDEntry mdEntry = new MDEntry();
-                        mdEntry .Entry= BigEndianStructHelper<MDEntryWithoutOrders>.BytesToStruct(mdEntryBytes, MsgConsts.MsgEncoding);
+                        mdEntry.Entry = BigEndianStructHelper<MDEntryWithoutOrders>.BytesToStruct(mdEntryBytes, MsgConsts.MsgEncoding);
                         startIndex += mdEntrySize;
                         if (mdEntry.Entry.NoOrders > 0)
                         {
@@ -274,7 +269,7 @@ namespace QuotV5.Binary
         public UInt32 NoMDEntries { get; private set; }
 
         public MDEntry[] MDEntries { get; private set; }
-        
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct MDEntry
         {
@@ -364,7 +359,12 @@ namespace QuotV5.Binary
             /// </summary>
             public Int64 MDEntrySize;
         }
+        public class MDEntryType
+        {
+            public const string Buy = "0";
+            public const string Sell = "1";
 
+        }
         #endregion
 
         protected override QuotSnapExtInfo300611 deserialize(byte[] bytes)
@@ -415,11 +415,11 @@ namespace QuotV5.Binary
     {
         protected static int commonInfoSize = Marshal.SizeOf(typeof(QuotSnapCommonInfo));
 
-        public QuotSnapCommonInfo CommonInfo { get;  set; }
+        public QuotSnapCommonInfo CommonInfo { get; set; }
 
-        public TExtInfo ExtInfo { get;  set; }
+        public TExtInfo ExtInfo { get; set; }
 
-        
+
         public static TQuotSnap Deserialize(byte[] bytes)
         {
 
@@ -456,16 +456,16 @@ namespace QuotV5.Binary
     /// 指数行情快照
     /// </summary>
     public class QuotSnap309011 : QuotSnapBase<QuotSnapExtInfo309011, QuotSnap309011>
-    { 
-    
+    {
+
     }
 
     /// <summary>
     /// 盘后定价大宗交易业务行情快照
     /// </summary>
     public class QuotSnap300611 : QuotSnapBase<QuotSnapExtInfo300611, QuotSnap300611>
-    { 
-    
+    {
+
     }
 
     #endregion

@@ -8,12 +8,13 @@ namespace QuotV5.StaticInfo
     /// <summary>
     /// 证券收盘行情
     /// </summary>
+    [XmlParseInfo("Securities", "Security")]
     public class SecurityCloseMD
     {
         /// <summary>
         /// 证券代码
         /// </summary>
-        public string SecuirtyID { get; set; }
+        public string SecurityID { get; set; }
 
         /// <summary>
         /// 证券简称
