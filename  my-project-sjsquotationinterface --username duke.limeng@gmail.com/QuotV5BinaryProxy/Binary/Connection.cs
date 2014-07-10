@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using ServiceManager.Utils;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 namespace QuotV5.Binary
 {
     public class ConnectionBase
@@ -442,8 +443,6 @@ namespace QuotV5.Binary
                 if (messageData.Header.BodyLength > 2000)
                 {
                     this.logHelper.LogWarnMsg("数据包头中指示的数据长度异常");
-                    //Logout();
-                    //Disconnect();
                     this.tcpDisconnectedEvent.Set();
                     return null;
                 }
@@ -474,8 +473,6 @@ namespace QuotV5.Binary
             catch (Exception ex)
             {
                 this.logHelper.LogWarnMsg(ex, string.Format("行情网关连接断开，IP={0},Port={1}", this.config.IP, this.config.Port));
-                //Logout();
-                //Disconnect();
                 this.tcpDisconnectedEvent.Set();
                 return null;
             }
@@ -507,59 +504,44 @@ namespace QuotV5.Binary
         /// <param name="length"></param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        protected byte[] SocketReceive(TcpClient tcpClient, int length)
+        private byte[] SocketReceive(TcpClient tcpClient, int length)
         {
-            if (length < 0)
-                return null;
-
             byte[] buffer = new byte[length];
             byte[] bodyBuff = new byte[length];
             int offset = 0;
-            bool timeOut = false;
-            System.Timers.Timer timer = null;
+
+            Stopwatch sw = Stopwatch.StartNew();
+
+            Exception ex = null;
             int timeout = this.config.ConnectionTimeoutMS;
-            if (timeout > 0)
-            {
-                timer = new System.Timers.Timer(timeout);
-                timer.AutoReset = false;
-                timer.Elapsed += (s, e) => { timeOut = true; };
-                timer.Start();
-            }
+
             bool succeed = false;
             while (true)
             {
-                if (this.tcpDisconnectedEvent.WaitOne(0))//检查是否已断开连接
-                    break;
-
-                if (timeOut)
+                if (timeout > 0 && sw.ElapsedMilliseconds > timeout)
                 {
-
-                    this.logHelper.LogWarnMsg(string.Format("Tcp  接收数据超时，IP={0},Port={1}", this.config.IP, this.config.Port));
-                    this.tcpDisconnectedEvent.Set();
+                    ex = new TimeoutException(string.Format("TCP 接收数据超时，IP={0},Port={1}", this.config.IP, this.config.Port));
                     break;
                 }
                 else if (tcpClient != null && tcpClient.Client != null && tcpClient.Client.Connected)
                 {
-
-                    if (tcpClient.Available > 0 && offset < length)
+                    int available = tcpClient.Available;
+                    if (available > 0 && offset < length)
                     {
-
                         int received = tcpClient.Client.Receive(
                             bodyBuff,
                             offset,
-                            Math.Min(tcpClient.Available, length - offset),
+                            Math.Min(available, length - offset),
                              SocketFlags.None);
 
                         offset += received;
                         if (timeout > 0)
                         {
-                            timer.Stop();
-                            timer.Start();
+                            sw.Restart();
                         }
                     }
                     else if (offset < length)
                     {
-                        // Thread.Sleep(1);
                     }
                     else
                     {
@@ -569,22 +551,15 @@ namespace QuotV5.Binary
                 }
                 else
                 {
-                    this.logHelper.LogWarnMsg(string.Format("行情网关连接断开，IP={0},Port={1}", this.config.IP, this.config.Port));
-                    this.tcpDisconnectedEvent.Set();
+                    ex = new Exception(string.Format("TCP 连接断开，IP={0},Port={1}", this.config.IP, this.config.Port));
                     break;
                 }
             }
-            if (timer != null)
-            {
-                try
-                {
-                    timer.Dispose();
-                    timer = null;
-                }
-                catch { }
-            }
+
             if (succeed)
                 return bodyBuff;
+            else if (ex != null)
+                throw ex;
             else
                 return null;
 

@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace MDS.Plugin.SZQuotV5
 {
-    public class QuotationMQPublisher:IDisposable
+    public class QuotationMQPublisher : IDisposable
     {
         private QuotationMQPublisherConfig config;
         private Log4cb.ILog4cbHelper logHelper;
@@ -132,24 +132,22 @@ namespace MDS.Plugin.SZQuotV5
             }
         }
 
-        private void Publish<T>(List<T> data, string clientId, MQMsgType msgType, string topic,bool sendFinishMsg=false)
+        private void Publish<T>(List<T> data, string clientId, MQMsgType msgType, string topic, bool sendFinishMsg = false)
         {
             if (data == null || data.Count == 0)
                 return;
-            Dictionary<string, object> properties;
-            if (string.IsNullOrEmpty(clientId))
-                properties = null;
-            else
+            Dictionary<string, object> properties = new Dictionary<string, object>();
+            properties["refreshType"] = "STK";
+            if (!string.IsNullOrEmpty(clientId))
             {
-                properties = new Dictionary<string, object>();
                 properties["clientId"] = clientId;
             }
+            string msgId;
             for (int index = 0; index < data.Count; index += this.config.RecordsPerPackage)
             {
                 var subList = data.Skip(index).Take(this.config.RecordsPerPackage).ToList();
-               // var dataBytes = JsonSerializer.ObjectToBytes<List<T>>(subList);
+                // var dataBytes = JsonSerializer.ObjectToBytes<List<T>>(subList);
                 var dataStr = JsonSerializer.ObjectToString<List<T>>(subList);
-                string msgId;
                 bool succeed = this.mqProducer.SendMsg(msgType, topic, dataStr, properties, 2000, out msgId);
                 if (succeed)
                 {
@@ -160,6 +158,11 @@ namespace MDS.Plugin.SZQuotV5
                     this.logHelper.LogInfoMsg("向MQ发送数据失败，MsgId={0},数据类型={1},数量={2}", msgId, typeof(T).Name, subList.Count);
                 }
             }
+            properties["refreshSignal"] = "Finish";
+
+            bool s = this.mqProducer.SendMsg(msgType, topic, string.Empty, properties, 2000, out msgId);
+            this.logHelper.LogInfoMsg("向MQ发送数据结束消息，MsgId={0},数据类型={1},Succeed={2}", msgId, typeof(T).Name, s);
+
         }
 
 

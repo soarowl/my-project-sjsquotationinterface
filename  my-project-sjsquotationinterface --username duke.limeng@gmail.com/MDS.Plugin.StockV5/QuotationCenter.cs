@@ -34,17 +34,6 @@ namespace MDS.Plugin.SZQuotV5
                 SenderCompID = connConfig.SenderCompID,
                 Password = connConfig.Password
             };
-            //QuotV5.Binary.ConnectionConfig realtimeConnConfig = new QuotV5.Binary.ConnectionConfig() 
-            //{
-            //    IP = System.Net.IPAddress.Parse("172.16.1.99"),
-            //    TargetCompID = "N4005Q0001          ",
-            //    Port = 8016,
-            //    HeartbeatIntervalS = 3,
-            //    ConnectionTimeoutMS = 10000,
-            //    ReconnectIntervalMS = 10000,
-            //    SenderCompID = "realtime            ",
-            //    Password = "                "
-            //};
             QuotV5.Binary.RealTimeQuotConnection realtimeQuotConn = new QuotV5.Binary.RealTimeQuotConnection(realtimeConnConfig, this.logHelper);
 
             QuotationRepository quotRepository = new QuotationRepository();

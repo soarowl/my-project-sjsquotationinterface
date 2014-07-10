@@ -1,0 +1,857 @@
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Net;
+//using System.Threading;
+//using System.Collections.Concurrent;
+//using System.Net.Sockets;
+//using System.Runtime.InteropServices;
+//using System.IO;
+
+//namespace QuotV5.Binary
+//{
+//    public class ConnectionBase
+//    {
+//        protected ConnectionConfig config;
+//        protected Log4cb.ILog4cbHelper logHelper;
+//        protected object connSyncObj = new object();
+
+
+
+//        /// <summary>
+//        /// 消息包头长度
+//        /// </summary>
+//        protected static int messageHeaderLength = Marshal.SizeOf(typeof(StandardHeader));
+//        /// <summary>
+//        /// 消息包尾长度
+//        /// </summary>
+//        protected static int messageTrailerLength = Marshal.SizeOf(typeof(Trailer));
+
+//        /// <summary>
+//        /// 控制连接的线程
+//        /// </summary>
+//        protected Thread connThread;
+
+
+//        protected Thread heartbeatThread;
+
+//        /// <summary>
+//        /// 停止
+//        /// </summary>
+//        protected ManualResetEvent stopEvent = new ManualResetEvent(false);
+
+//        /// <summary>
+//        /// 连接已断开
+//        /// </summary>
+//        protected ManualResetEvent tcpDisconnectedEvent = new ManualResetEvent(false);
+
+//        /// <summary>
+//        /// 接收行情的线程已退出
+//        /// </summary>
+//        protected ManualResetEvent receiveThreadExitEvent = new ManualResetEvent(false);
+
+//        /// <summary>
+//        /// TCP连接
+//        /// </summary>
+//        protected TcpClient tcpClient;
+
+
+//        protected bool marketDataReceiveThreadStarted = false;
+
+//        public ConnectionBase(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
+//        {
+//            this.config = config;
+//            this.logHelper = logHelper;
+//        }
+
+//        public void Start()
+//        {
+//            lock (this.connSyncObj)
+//            {
+//                if (this.CurrentStatus == Status.Started)
+//                    return;
+//                this.logHelper.LogInfoMsg("Connection Starting");
+//                this.CurrentStatus = Status.Starting;
+//                this.stopEvent.Reset();
+//                this.tcpDisconnectedEvent.Reset();
+//                // this.receiveThreadExitEvent.Reset();
+//                CreateConnectionThread();
+//                this.CurrentStatus = Status.Started;
+//                this.logHelper.LogInfoMsg("Connection Started");
+//            }
+//        }
+
+//        public void Stop()
+//        {
+//            lock (this.connSyncObj)
+//            {
+//                if (this.CurrentStatus == Status.Stopped)
+//                    return;
+//                try
+//                {
+//                    this.logHelper.LogInfoMsg("Connection Stopping");
+//                    this.CurrentStatus = Status.Stopping;
+//                    this.stopEvent.Set();
+//                    if (this.marketDataReceiveThreadStarted)
+//                        this.receiveThreadExitEvent.WaitOne();
+//                    Disconnect();
+//                }
+//                catch (Exception ex)
+//                {
+//                    this.logHelper.LogErrMsg(ex, "Connection Stopping Exception");
+//                }
+//                finally
+//                {
+//                    this.CurrentStatus = Status.Stopped;
+//                    this.logHelper.LogInfoMsg("Connection Stopped");
+//                }
+//            }
+//        }
+
+
+//        protected void CreateConnectionThread()
+//        {
+//            this.connThread = new Thread(new ThreadStart(ConnAndLogon));
+//            this.connThread.Name = "ConnThread";
+//            this.connThread.Start();
+//            Thread.Sleep(0);
+//        }
+
+
+//        /// <summary>
+//        /// 连接到行情网关
+//        /// </summary>
+//        protected void ConnAndLogon()
+//        {
+//            this.logHelper.LogInfoMsg("ConnThread线程启动");
+//            while (true)
+//            {
+//                Disconnect();
+//                if (this.stopEvent.WaitOne(0))
+//                    break;
+//                if (this.marketDataReceiveThreadStarted)
+//                {
+//                    int index = WaitHandle.WaitAny(new WaitHandle[] { this.stopEvent, this.receiveThreadExitEvent });
+//                    if (index == 0)
+//                        break;
+//                }
+
+//                TcpClient tcpClient = ConnectToServer();
+
+//                if (tcpClient != null)
+//                {
+//                    this.logHelper.LogInfoMsg(string.Format("Tcp连接成功，IP={0},Port={1}", this.config.IP, this.config.Port));
+//                    this.tcpClient = tcpClient;
+//                    this.tcpDisconnectedEvent.Reset();
+//                    Logon logonAns;
+//                    if (Logon(out logonAns))
+//                    {
+//                        OnLogonSucceed();
+//                        int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent });
+//                        if (index == 0)
+//                        {
+//                            break;
+//                        }
+//                    }
+//                    else
+//                    {
+//                        int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent }, this.config.ReconnectIntervalMS);
+//                        if (index == 0)
+//                        {
+//                            break;
+//                        }
+//                    }
+//                }
+//                else
+//                {
+//                    this.logHelper.LogWarnMsg(string.Format("Tcp连接失败，IP={0},Port={1}", this.config.IP, this.config.Port));
+//                    int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent }, this.config.ReconnectIntervalMS);
+//                    if (index == 0)
+//                    {
+//                        break;
+//                    }
+//                }
+//            }
+//            this.logHelper.LogInfoMsg("ConnThread线程退出");
+//        }
+
+
+//        protected virtual void OnLogonSucceed()
+//        {
+//            CreateHeartbeatThread();
+//        }
+
+//        #region 心跳发送
+//        protected void CreateHeartbeatThread()
+//        {
+//            if (this.heartbeatThread != null)
+//            {
+//                try
+//                {
+//                    this.heartbeatThread.Abort();
+//                }
+//                catch { }
+//            }
+//            this.heartbeatThread = new Thread(new ThreadStart(SendHeartbeat));
+//            this.heartbeatThread.Name = "HeartbeatThread";
+//            this.heartbeatThread.Start();
+//            Thread.Sleep(0);
+//        }
+//        protected void SendHeartbeat()
+//        {
+//            Heartbeat heartbeat = new Heartbeat() { };
+//            int heartbeatInterval = this.config.HeartbeatIntervalS * 1000;
+//            byte[] msgBytes = MessageHelper.ComposeMessage<Heartbeat>(heartbeat);
+//            while (true)
+//            {
+//                if (this.tcpDisconnectedEvent.WaitOne(heartbeatInterval))//检查是否已断开连接
+//                    break;
+//                bool succeed = SocketSend(msgBytes);
+//                this.logHelper.LogDebugMsg("发送心跳 Succeed={0}", succeed);
+//            }
+//        }
+//        #endregion
+
+
+//        /// <summary>
+//        /// 关闭TCP连接
+//        /// </summary>
+//        protected void Disconnect()
+//        {
+//            if (this.tcpClient != null)
+//            {
+//                try
+//                {
+//                    this.tcpClient.Client.Disconnect(false);
+//                    this.tcpClient.Close();
+//                    this.tcpClient = null;
+//                }
+//                catch (Exception ex)
+//                {
+//                    this.logHelper.LogWarnMsg(ex, "关闭Tcp连接异常，Ip={0},Port={1}", this.config.IP, this.config.Port);
+//                }
+//            }
+//        }
+
+
+//        /// <summary>
+//        /// 连接服务器
+//        ///     采用异步方式等待连接事件，避免因服务器未开启而耗费过长时间等待
+//        /// </summary>
+//        protected TcpClient ConnectToServer()
+//        {
+//            int milliSecondsTimeout = this.config.ConnectionTimeoutMS;
+//            TcpClient newTcpClient = new TcpClient();
+//            newTcpClient.Client.ReceiveBufferSize = 1024 * 1024 * 100;
+//            newTcpClient.NoDelay = true;
+//            newTcpClient.ReceiveTimeout = milliSecondsTimeout;
+//            newTcpClient.SendTimeout = milliSecondsTimeout;
+//            IAsyncResult result = null;
+
+//            try
+//            {
+//                result = newTcpClient.BeginConnect(this.config.IP, this.config.Port, null, null);
+//                result.AsyncWaitHandle.WaitOne(milliSecondsTimeout, false);
+
+//                if (result.IsCompleted)
+//                {
+//                    newTcpClient.EndConnect(result);
+//                    result.AsyncWaitHandle.Close();
+//                    return newTcpClient;
+//                }
+//                else
+//                {
+//                    newTcpClient.EndConnect(result);
+
+//                    newTcpClient.Close();
+//                    result.AsyncWaitHandle.Close();
+//                    return null;
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                if (newTcpClient != null) newTcpClient.Close();
+//                if (result != null) result.AsyncWaitHandle.Close();
+//                return null;
+//            }
+//        }
+
+
+
+//        #region 登录
+
+//        protected bool Logon(out Logon logonAnswer)
+//        {
+//            bool sendLogonSucceed = SendLogonRequest();
+
+//            if (sendLogonSucceed)
+//            {
+//                var answer = ReceiveLogonAnswer();
+//                if (answer != null)
+//                {
+//                    this.logHelper.LogInfoMsg("行情网关登录成功");
+//                    logonAnswer = answer.Value;
+//                    return true;
+//                }
+//                else
+//                {
+//                    this.logHelper.LogInfoMsg("行情网关登录失败");
+//                    logonAnswer = default(Logon);
+//                    return false;
+//                }
+//            }
+//            else
+//            {
+//                logonAnswer = default(Logon);
+//                return false;
+//            }
+//        }
+
+
+//        /// <summary>
+//        /// 发送登录请求
+//        /// </summary>
+//        /// <returns></returns>
+//        protected bool SendLogonRequest()
+//        {
+//            Logon logonReq = new Binary.Logon()
+//            {
+//                SenderCompID = this.config.SenderCompID,
+//                TargetCompID = this.config.TargetCompID,
+//                Password = this.config.Password,
+//                HeartBtInt = this.config.HeartbeatIntervalS,
+//                DefaultApplVerID = "1.00            "
+//                //DefaultApplVerID = "1.00"
+//            };
+//            var bytes = MessageHelper.ComposeMessage<Logon>(logonReq);
+//            return SocketSend(bytes);
+//        }
+
+
+//        /// <summary>
+//        /// 接收登录应答
+//        /// </summary>
+//        /// <returns></returns>
+//        protected Logon? ReceiveLogonAnswer()
+//        {
+//            var ans = ReceiveMessage();
+
+
+//            if (ans != null && ans.Header.Type == (UInt32)MsgType.Logon)
+//            {
+//                var loginAnswer = BigEndianStructHelper<Logon>.BytesToStruct(ans.BodyData, MsgConsts.MsgEncoding);
+//                return loginAnswer;
+//            }
+//            else if (ans != null && ans.Header.Type == (UInt32)MsgType.Logout)
+//            {
+//                var logout = BigEndianStructHelper<Logout>.BytesToStruct(ans.BodyData, MsgConsts.MsgEncoding);
+//                this.logHelper.LogErrMsg("登录失败：{0}", logout.Text);
+//                return null;
+//            }
+//            else
+//                return null;
+//        }
+
+
+
+
+
+
+
+//        protected bool Logout()
+//        {
+//            bool sendLogoutSucceed = SendLogoutRequest();
+
+//            if (sendLogoutSucceed)
+//            {
+//                var answer = ReceiveLogoutAnswer();
+//                if (answer != null)
+//                {
+//                    this.logHelper.LogInfoMsg("行情网关登出成功");
+//                    return true;
+//                }
+//                else
+//                {
+//                    this.logHelper.LogInfoMsg("行情网关登出失败");
+//                    return false;
+//                }
+//            }
+//            else
+//            {
+
+//                return false;
+//            }
+//        }
+
+//        /// <summary>
+//        /// 发送登录请求
+//        /// </summary>
+//        /// <returns></returns>
+//        protected bool SendLogoutRequest()
+//        {
+//            Logout logoutReq = new Binary.Logout()
+//            {
+//            };
+//            var bytes = MessageHelper.ComposeMessage<Logout>(logoutReq);
+//            bool succeed = SocketSend(bytes);
+//            this.logHelper.LogInfoMsg("发送Logout,Succeed={0}", succeed);
+//            return succeed;
+//        }
+//        /// <summary>
+//        /// 接收登录应答
+//        /// </summary>
+//        /// <returns></returns>
+//        protected Logout? ReceiveLogoutAnswer()
+//        {
+//            var ans = ReceiveMessage();
+
+
+//            if (ans != null && ans.Header.Type == (UInt32)MsgType.Logout)
+//            {
+//                var logout = BigEndianStructHelper<Logout>.BytesToStruct(ans.BodyData, MsgConsts.MsgEncoding);
+//                this.logHelper.LogErrMsg("登出成功：{0}", logout.Text);
+//                return null;
+//            }
+//            else
+//                return null;
+//        }
+
+//        #endregion
+
+
+
+
+
+
+//        /// <summary>
+//        /// 接收消息
+//        /// </summary>
+//        /// <returns></returns>
+//        protected MessagePack ReceiveMessage()
+//        {
+//            MessagePack messageData = null;
+//            try
+//            {
+//                byte[] headerBytes = SocketReceive(this.tcpClient, messageHeaderLength);
+
+//                if (headerBytes == null || headerBytes.Length == 0)
+//                    return null;
+
+//                messageData = new MessagePack(headerBytes);
+//                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1},threadId={2}", messageData.Header.Type, messageData.Header.BodyLength, Thread.CurrentThread.ManagedThreadId);
+
+//                //if (!Enum.IsDefined(typeof(MsgType), (int)messageData.Header.Type))
+//                //    return null;
+
+//                if (messageData.Header.BodyLength > 2000)
+//                {
+//                    this.logHelper.LogWarnMsg("数据包头中指示的数据长度异常");
+//                    //Logout();
+//                    //Disconnect();
+//                    this.tcpDisconnectedEvent.Set();
+//                    return null;
+//                }
+
+//                if (messageData.Header.BodyLength > 0)
+//                {
+//                    messageData.BodyData = SocketReceive(this.tcpClient, (int)messageData.Header.BodyLength);
+//                    messageData.TrailerData = SocketReceive(this.tcpClient, messageTrailerLength);
+//                    string msg;
+//                    if (messageData.Validate(out msg))
+//                    {
+//                        return messageData;
+//                    }
+//                    else
+//                    {
+//                        this.logHelper.LogWarnMsg("验证消息：{0},Message:\r\n{1}", msg, messageData.ToLogString());
+//                        return null;
+//                    }
+//                }
+//                else if (messageData.Header.Type == (UInt32)MsgType.Heartbeat)
+//                {
+//                    messageData.TrailerData = SocketReceive(this.tcpClient, messageTrailerLength);
+//                    return messageData;
+//                }
+//                else
+//                    return null;
+//            }
+//            catch (Exception ex)
+//            {
+//                this.logHelper.LogWarnMsg(ex, string.Format("行情网关连接断开，IP={0},Port={1}", this.config.IP, this.config.Port));
+//                //Logout();
+//                //Disconnect();
+//                this.tcpDisconnectedEvent.Set();
+//                return null;
+//            }
+//        }
+
+//        #region Socket收发数据
+//        /// <summary>
+//        /// 发送数据
+//        /// </summary>
+//        /// <param name="data"></param>
+//        protected bool SocketSend(byte[] data)
+//        {
+//            try
+//            {
+//                this.tcpClient.Client.Send(data);
+//                return true;
+//            }
+//            catch (Exception ex)
+//            {
+//                this.logHelper.LogWarnMsg(ex, "TCP发送数据异常");
+//                return false;
+//            }
+//        }
+
+//        /// <summary>
+//        /// 接收数据
+//        /// </summary>
+//        /// <param name="tcpClient"></param>
+//        /// <param name="length"></param>
+//        /// <param name="timeout"></param>
+//        /// <returns></returns>
+//        protected byte[] SocketReceive(TcpClient tcpClient, int length)
+//        {
+//            if (length < 0)
+//                return null;
+
+//            byte[] buffer = new byte[length];
+//            byte[] bodyBuff = new byte[length];
+//            int offset = 0;
+//            bool timeOut = false;
+//            System.Timers.Timer timer = null;
+//            int timeout = this.config.ConnectionTimeoutMS;
+//            if (timeout > 0)
+//            {
+//                timer = new System.Timers.Timer(timeout);
+//                timer.AutoReset = false;
+//                timer.Elapsed += (s, e) => { timeOut = true; };
+//                timer.Start();
+//            }
+//            bool succeed = false;
+//            while (true)
+//            {
+//                if (this.tcpDisconnectedEvent.WaitOne(0))//检查是否已断开连接
+//                    break;
+
+//                if (timeOut)
+//                {
+
+//                    this.logHelper.LogWarnMsg(string.Format("Tcp  接收数据超时，IP={0},Port={1}", this.config.IP, this.config.Port));
+//                    this.tcpDisconnectedEvent.Set();
+//                    break;
+//                }
+//                else if (tcpClient != null && tcpClient.Client != null && tcpClient.Client.Connected)
+//                {
+
+//                    if (tcpClient.Available > 0 && offset < length)
+//                    {
+
+//                        int received = tcpClient.Client.Receive(
+//                            bodyBuff,
+//                            offset,
+//                            Math.Min(tcpClient.Available, length - offset),
+//                             SocketFlags.None);
+
+//                        offset += received;
+//                        if (timeout > 0)
+//                        {
+//                            timer.Stop();
+//                            timer.Start();
+//                        }
+//                    }
+//                    else if (offset < length)
+//                    {
+//                        // Thread.Sleep(1);
+//                    }
+//                    else
+//                    {
+//                        succeed = true;
+//                        break;
+//                    }
+//                }
+//                else
+//                {
+//                    this.logHelper.LogWarnMsg(string.Format("行情网关连接断开，IP={0},Port={1}", this.config.IP, this.config.Port));
+//                    this.tcpDisconnectedEvent.Set();
+//                    break;
+//                }
+//            }
+//            if (timer != null)
+//            {
+//                try
+//                {
+//                    timer.Dispose();
+//                    timer = null;
+//                }
+//                catch { }
+//            }
+//            if (succeed)
+//                return bodyBuff;
+//            else
+//                return null;
+
+//        }
+
+//        #endregion
+
+
+//        public Status CurrentStatus { get; private set; }
+
+//        /// <summary>
+//        /// 表示当前状态
+//        /// </summary>
+//        public enum Status
+//        {
+//            Starting,
+//            Started,
+//            Stopping,
+//            Stopped
+//        }
+//    }
+
+//    public class RealTimeQuotConnection : ConnectionBase
+//    {
+//        public event Action<IMarketData> OnMarketDataReceived;
+
+//        private ConcurrentQueue<MessagePackEx> receivedMessages = new ConcurrentQueue<MessagePackEx>();
+//        public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
+//            : base(config, logHelper)
+//        {
+
+//        }
+
+//        /// <summary>
+//        /// 接收行情数据的线程
+//        /// </summary>
+//        protected Thread marketDataReceiveThread;
+
+//        ConnectionSession session;
+//        /// <summary>
+//        /// 成功登录后
+//        /// </summary>
+//        protected override void OnLogonSucceed()
+//        {
+//            base.OnLogonSucceed();
+//            session = new ConnectionSession(this.tcpClient);
+//            //StartMarketDataReceiveThread();
+
+//            this.tcpClient.GetStream().BeginRead(session.RecvBuffer, 0, messageHeaderLength, (AsyncCallback)AsyncReceiveCallback, session);
+//        }
+
+
+//        ///// <summary>
+//        ///// 启动线程接收行情数据
+//        ///// </summary>
+//        //protected void StartMarketDataReceiveThread()
+//        //{
+//        //    if (this.marketDataReceiveThread != null)
+//        //    {
+//        //        try
+//        //        {
+//        //            this.marketDataReceiveThread.Abort();
+//        //        }
+//        //        catch { }
+//        //    }
+
+//        //    this.marketDataReceiveThread = new Thread(new ThreadStart(ReceiveMarketData));
+//        //    this.marketDataReceiveThread.Name = "MarketDataReceiveThread";
+//        //    this.marketDataReceiveThread.Start();
+//        //}
+
+//        /// <summary>
+//        /// 接收行情数据
+//        /// </summary>
+//        private void ReceiveMarketData()
+//        {
+//            this.receiveThreadExitEvent.Reset();
+//            this.marketDataReceiveThreadStarted = true;
+//            this.logHelper.LogInfoMsg("MarketDataReceiveThread线程启动");
+//            while (true)
+//            {
+//                var index = WaitHandle.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent }, 0);
+//                if (index == 0 || index == 1)
+//                    break;
+//                var msg = ReceiveMessage();
+//                if (msg != null)
+//                    ProcessMessage(msg);
+//            }
+
+//            this.marketDataReceiveThreadStarted = false;
+//            this.logHelper.LogInfoMsg("MarketDataReceiveThread线程退出");
+//            this.receiveThreadExitEvent.Set();
+//        }
+
+//        /// <summary>
+//        /// 处理行情数据
+//        /// </summary>
+//        /// <param name="msg"></param>
+//        /// TODO:考虑把收到的数据包加入队列异步处理
+//        private void ProcessMessage(MessagePack msg)
+//        {
+//            IMarketData marketData = null;
+//            if (msg.Header.Type == (uint)MsgType.ChannelHeartbeat)
+//            {
+//                ChannelHeartbeat heartbeat = ChannelHeartbeat.Deserialize(msg.BodyData);
+//                logMarketData<ChannelHeartbeat>(heartbeat);
+//            }
+//            else if (msg.Header.Type == (uint)MsgType.QuotationSnap)
+//            {
+//                marketData = QuotSnap300111.Deserialize(msg.BodyData);
+//                logMarketData<QuotSnap300111>(marketData as QuotSnap300111);
+//            }
+//            else if (msg.Header.Type == (uint)MsgType.IndexQuotationSnap)
+//            {
+//                marketData = QuotSnap309011.Deserialize(msg.BodyData);
+//                logMarketData<QuotSnap309011>(marketData as QuotSnap309011);
+//            }
+//            else if (msg.Header.Type == (uint)MsgType.Order)
+//            {
+//                marketData = Order300192.Deserialize(msg.BodyData);
+//                logMarketData<Order300192>((Order300192)marketData);
+//            }
+//            if (marketData != null)
+//            {
+//                logMarketData(marketData);
+//                RaiseEvent(marketData);
+//            }
+
+//        }
+
+
+
+//        private void logMarketData<TMarketData>(TMarketData marketData)
+//        {
+//            string str = ObjectLogHelper<TMarketData>.ObjectToString(marketData);
+//            logHelper.LogDebugMsg("收到数据：\r\n{0}", str);
+//        }
+
+//        private void RaiseEvent(IMarketData marketData)
+//        {
+//            var handler = this.OnMarketDataReceived;
+//            if (handler != null)
+//                handler(marketData);
+//        }
+
+//        internal void AsyncReceiveCallback(IAsyncResult ar)
+//        {
+//            ConnectionSession session = null;
+
+//            try
+//            {
+//                session = ar.AsyncState as ConnectionSession;
+//                if (session == null) return;
+
+//                NetworkStream stream = session.Stream;
+//                if (stream == null) return;
+
+//                int recvLength = stream.EndRead(ar);
+
+//                //连线断开
+//                if (recvLength <= 0)
+//                {
+//                    session.ManualClose();
+//                    return;
+//                }
+
+//                session.RecvLength += recvLength;
+
+//                //如果包头还未收齐，则继续收集
+//                if (session.RecvLength < messageHeaderLength)
+//                    stream.BeginRead(session.RecvBuffer, (int)session.RecvLength, (int)(messageHeaderLength - session.RecvLength), (AsyncCallback)AsyncReceiveCallback, session);
+
+//                //如果刚刚收齐包头
+//                else if (session.RecvLength == messageHeaderLength)
+//                {
+//                    session.MessagePack = new MessagePack(session.RecvBuffer);
+//                    int remainLength = (int)session.MessagePack.Header.BodyLength + messageTrailerLength;
+//                    int nextReadLength = Math.Min(remainLength, ConnectionSession.RecvBufferLength);
+//                    stream.BeginRead(session.RecvBuffer, 0,
+//                       nextReadLength,
+//                        (AsyncCallback)AsyncReceiveCallback, session);
+//                }
+
+//                //如果数据包接收完整了
+//                else if (session.RecvLength == messageHeaderLength + messageTrailerLength + session.MessagePack.Header.BodyLength)
+//                {
+//                    //暂存数据
+//                    session.RecvDataStream.Write(session.RecvBuffer, 0, recvLength);
+                    
+//                    var data=  session.RecvDataStream.ToArray();
+//                    session.MessagePack.BodyData = data.Skip(messageHeaderLength).Take((int)session.MessagePack.Header.BodyLength).ToArray();
+//                    session.MessagePack.TrailerData = data.Skip(messageHeaderLength + (int)session.MessagePack.Header.BodyLength).Take(messageTrailerLength).ToArray();
+//                    //数据包加入到队列
+//                    string errMsg;
+//                    if (session.MessagePack.Validate(out errMsg))
+//                        this.receivedMessages.Enqueue(new MessagePackEx(session.MessagePack));
+//                    else
+//                    {
+//                        throw new Exception("收到的数据包校验错误");
+//                    }
+//                    //开始接收下一个请求
+//                    session.RecvLength = 0;
+//                    session.RecvDataStream.Seek(0, SeekOrigin.Begin);
+//                    stream.BeginRead(session.RecvBuffer, 0, messageHeaderLength, (AsyncCallback)AsyncReceiveCallback, session);
+//                }
+
+//                //如果数据包还未接收完
+//                else
+//                {
+//                    //暂存数据
+//                    session.RecvDataStream.Write(session.RecvBuffer, 0, recvLength);
+
+//                    //继续接收剩下的数据
+//                    int remainLength = messageHeaderLength + messageTrailerLength + (int)session.MessagePack.Header.BodyLength - session.RecvLength;
+//                    int nextReadLength = Math.Min(remainLength, ConnectionSession.RecvBufferLength);
+//                    stream.BeginRead(session.RecvBuffer, 0,
+//                            nextReadLength,
+//                            (AsyncCallback)AsyncReceiveCallback, session);
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//                this.logHelper.LogErrMsg(ex);
+//                session.ManualClose();
+//                return;
+//            }
+//        }
+
+//    }
+
+//    public class ResendQuotConnection : ConnectionBase
+//    {
+
+//        public ResendQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
+//            : base(config, logHelper)
+//        {
+
+//        }
+
+//        protected override void OnLogonSucceed()
+//        {
+//            base.OnLogonSucceed();
+//        }
+//    }
+//    public class MessagePackEx
+//    {
+//        public MessagePackEx(MessagePack messagePack)
+//        {
+//            this.Pack = messagePack;
+//        }
+//        public MessagePack Pack { get; private set; }
+//        public DateTime ReceivedTime { get; private set; }
+//    }
+//    public class ConnectionConfig
+//    {
+//        public IPAddress IP { get; set; }
+//        public int Port { get; set; }
+//        public string SenderCompID { get; set; }
+//        public string TargetCompID { get; set; }
+//        public string Password { get; set; }
+//        public int ConnectionTimeoutMS { get; set; }
+//        public int ReconnectIntervalMS { get; set; }
+//        public int HeartbeatIntervalS { get; set; }
+//    }
+//}

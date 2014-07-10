@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binary\Connection2.cs" />
+    <Compile Include="Binary\ConnectionSession.cs" />
     <Compile Include="Binary\MsgDefinations\IMarketData.cs" />
     <Compile Include="Binary\MsgDefinations\QuotSnap.cs" />
     <Compile Include="Binary\MsgDefinations\Order.cs" />
