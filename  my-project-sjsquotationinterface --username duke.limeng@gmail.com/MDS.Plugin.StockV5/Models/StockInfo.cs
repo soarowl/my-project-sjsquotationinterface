@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     public class StockInfo
     {
+        public StockInfo()
+        {
+            this.exchId = "1";
+        }
         /// <summary>
         /// 市场代码
         /// </summary>

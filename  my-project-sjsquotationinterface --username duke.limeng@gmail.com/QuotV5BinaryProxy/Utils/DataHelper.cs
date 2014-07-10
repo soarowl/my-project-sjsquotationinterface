@@ -10,12 +10,15 @@ namespace QuotV5
 
         public static byte[] UnionByteArrays(params byte[][] byteArrays)
         {
-            byte[] rtn = new byte[byteArrays.Sum(ba => ba.Length)];
+            byte[] rtn = new byte[byteArrays.Where(ba => ba != null).Sum(ba => ba.Length)];
             int offset = 0;
             foreach (var ba in byteArrays)
             {
-                ba.CopyTo(rtn, offset);
-                offset += ba.Length;
+                if (ba != null)
+                {
+                    ba.CopyTo(rtn, offset);
+                    offset += ba.Length;
+                }
             }
             return rtn;
         }

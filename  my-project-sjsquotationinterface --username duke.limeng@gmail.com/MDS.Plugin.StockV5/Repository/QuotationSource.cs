@@ -5,7 +5,7 @@ using System.Text;
 using ServiceManager.Services;
 using System.Diagnostics;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     /// <summary>
     /// 行情源

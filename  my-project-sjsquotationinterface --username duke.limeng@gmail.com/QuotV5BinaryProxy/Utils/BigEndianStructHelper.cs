@@ -33,9 +33,9 @@ namespace QuotV5
                     if (refAss != null)
                         cp.ReferencedAssemblies.Add(refAss.Location);
                     else
-                    { 
-                    
-                    
+                    {
+
+
                     }
                 }
             }
@@ -125,8 +125,16 @@ namespace QuotV5
                 int offset = Marshal.OffsetOf(type, field.Name).ToInt32();
                 if (fieldType == typeof(string))
                 {
-                    sb.AppendLine(string.Format("var fieldBytes_{0}=encoding.GetBytes(obj.{0});", field.Name));
-                    sb.AppendLine(string.Format("fieldBytes_{0}.CopyTo(rtn,{1});", field.Name, offset));
+
+                    var attr = Attribute.GetCustomAttribute(field, typeof(MarshalAsAttribute)) as MarshalAsAttribute;
+                    var fieldLength = attr.SizeConst;
+
+                    sb.AppendLine(string.Format("if(!string.IsNullOrEmpty(obj.{0})){{", field.Name));
+                    sb.AppendLine(string.Format("var fieldBytes_{0}=encoding.GetBytes(obj.{0}.PadRight({1}));", field.Name, fieldLength));
+                    sb.AppendLine(string.Format("fieldBytes_{0}.CopyTo(rtn,{1});}}", field.Name, offset));
+                    sb.AppendLine("else{");
+                    sb.AppendLine(string.Format("var fieldBytes_{0}=encoding.GetBytes(string.Empty.PadRight({1}));", field.Name, fieldLength));
+                    sb.AppendLine(string.Format("fieldBytes_{0}.CopyTo(rtn,{1});}}", field.Name, offset));
                 }
                 else if (
                     fieldType == typeof(Int16)

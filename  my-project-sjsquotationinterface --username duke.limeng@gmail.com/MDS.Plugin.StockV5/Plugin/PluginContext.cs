@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using ServiceHost.Core;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     /// <summary>
     /// 插件上下文类
@@ -15,6 +15,8 @@ namespace MDS.Plugin.StockV5
 		/// 
 		/// </summary>
 		static PluginContext Instance;
+
+        internal static Configuration Configuration;
 
 		/// <summary>
 		/// 静态方法，获得模块上下文类实例

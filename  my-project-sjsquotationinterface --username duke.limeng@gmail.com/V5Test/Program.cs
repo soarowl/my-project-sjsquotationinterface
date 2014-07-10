@@ -5,6 +5,7 @@ using System.Text;
 using Log4cb;
 using System.IO;
 using System.Linq.Expressions;
+using System.Threading;
 namespace V5Test
 {
     class Program
@@ -12,10 +13,13 @@ namespace V5Test
         static Log4cb.ILog4cbHelper logHelper = new Log4cb.Log4cbHelper("V5");
         static void Main(string[] args)
         {
+            //testMQConsumer2();
+           // Thread.Sleep(3000);
+            // testMQProducer();
             //testObjToString();
-            testRealtimeQuotConn();
+             testRealtimeQuotConn();
             // testStaticInfo_Index();
-            //testStaticInfo_Security();
+            // testStaticInfo_Security();
             //  testStaticInfo_CashAuctionParams();
             //testStaticInfo_DerivativeAuctionParams();
             //testFastReflection();
@@ -40,6 +44,79 @@ namespace V5Test
             Console.Read();
         }
 
+
+        private static void testMQProducer()
+        {
+            MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.195:61616" };
+            MDS.Plugin.SZQuotV5.MQProducer mp = new MDS.Plugin.SZQuotV5.MQProducer(cfg, logHelper);
+            mp.StartMQ();
+            var properties = new Dictionary<string, object>();
+            properties["clientId"] = "test1";
+            string msgId;
+            bool succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_StkInfo", string.Empty, properties, 2000, out msgId);
+            Console.WriteLine(string.Format("SZ5_REQ_StkInfo succeed={1},msgId={0}", msgId, succeed));
+
+            succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_Quotation", string.Empty, properties, 2000, out msgId);
+            Console.WriteLine(string.Format("SZ5_REQ_Quotation succeed={1},msgId={0}", msgId, succeed));
+            //MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.164:61616" };
+            //MDS.Plugin.SZQuotV5.MQProducer producer = new MDS.Plugin.SZQuotV5.MQProducer(cfg, logHelper);
+            //producer.StartMQ();
+            //MDS.Plugin.SZQuotV5.StockInfo stockInfo=new MDS.Plugin.SZQuotV5.StockInfo ()
+            //{
+            //stkId ="000001"
+            //};
+            //byte[] data=ObjectToBytes(stockInfo);
+            //string msgId;
+            //bool succeed = producer.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.TOPIC, "1503-ActiveMQURI-3", data, null, 5000, out msgId);
+
+        }
+
+        private static void testMQConsumer()
+        {
+            MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.195:61616" };
+            MDS.Plugin.SZQuotV5.MQConsumer consumer = new MDS.Plugin.SZQuotV5.MQConsumer(cfg, logHelper);
+            consumer.StartMQ();
+            consumer.OnMessageReceived += new Action<string, Dictionary<string, object>>(consumer_OnMessageReceived);
+            consumer.SubscribeMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_StkInfo_Image", null);
+
+            MDS.Plugin.SZQuotV5.MQConsumer consumer2 = new MDS.Plugin.SZQuotV5.MQConsumer(cfg, logHelper);
+            consumer2.StartMQ();
+            consumer2.OnMessageReceived += new Action<string, Dictionary<string, object>>(consumer2_OnMessageReceived);
+            consumer2.SubscribeMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_Quotation_Image", null);
+        }
+        private static void testMQConsumer2()
+        {
+            MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.195:61616" };
+            MDS.Plugin.SZQuotV5.MQConsumer consumer = new MDS.Plugin.SZQuotV5.MQConsumer(cfg, logHelper);
+            consumer.StartMQ();
+            consumer.OnMessageReceived += new Action<string, Dictionary<string, object>>(consumer_OnMessageReceived);
+            consumer.SubscribeMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_StkInfo", null);
+
+            MDS.Plugin.SZQuotV5.MQConsumer consumer2 = new MDS.Plugin.SZQuotV5.MQConsumer(cfg, logHelper);
+            consumer2.StartMQ();
+            consumer2.OnMessageReceived += new Action<string, Dictionary<string, object>>(consumer2_OnMessageReceived);
+            consumer2.SubscribeMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_Quotation", null);
+        }
+
+        static List<MDS.Plugin.SZQuotV5.QuotationInfo> qoutList;
+        static List<MDS.Plugin.SZQuotV5.StockInfo> stockList;
+        static void consumer2_OnMessageReceived(string arg1, Dictionary<string, object> arg2)
+        {
+            qoutList = MDS.Plugin.SZQuotV5.JsonSerializer.StringToObject<List<MDS.Plugin.SZQuotV5.QuotationInfo>>(arg1);
+            Console.WriteLine("SZ5_Quotation_Image Count={0},clientID={1}", qoutList.Count, arg2["clientId"]);
+        }
+
+        static void consumer_OnMessageReceived(string arg1, Dictionary<string, object> arg2)
+        {
+            stockList = MDS.Plugin.SZQuotV5.JsonSerializer.StringToObject<List<MDS.Plugin.SZQuotV5.StockInfo>>(arg1);
+            Console.WriteLine("SZ5_StkInfo_Image Count={0},clientID={1}", stockList.Count, arg2["clientId"]);
+        }
+
+        private static byte[] ObjectToBytes<T>(T obj)
+        {
+            var str = ServiceStack.Text.JsonSerializer.SerializeToString<T>(obj);
+            return Encoding.UTF8.GetBytes(str);
+        }
         private static void testObjToString()
         {
             QuotV5.Binary.QuotSnap300111 quotSnap = new QuotV5.Binary.QuotSnap300111()
@@ -147,11 +224,13 @@ namespace V5Test
 
         private static void testStaticInfo_Security()
         {
-            string securityFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Samples/securities_20140121.xml");
+            string securityFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Samples/securities_20140703.xml");
             string fileContent = File.ReadAllText(securityFile, Encoding.UTF8);
             CodeTimer.CodeTimer.Initialize();
             QuotV5.StaticInfo.SecurityInfoParser parser = new QuotV5.StaticInfo.SecurityInfoParser();
             var securities = parser.Parse(fileContent);
+
+            var sec150167 = securities.FirstOrDefault(s => s.CommonInfo.SecurityID == "150167");
             CodeTimer.CodeTimer.Time("ParseSecurity", 10, () => { var ss = parser.Parse(fileContent); });
 
         }

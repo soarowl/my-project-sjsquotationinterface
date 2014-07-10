@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MDS.Plugin.StockV5;
+using MDS.Plugin.SZQuotV5;
 using System.Collections.Concurrent;
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     public class RawStaticInfoSnap
     {

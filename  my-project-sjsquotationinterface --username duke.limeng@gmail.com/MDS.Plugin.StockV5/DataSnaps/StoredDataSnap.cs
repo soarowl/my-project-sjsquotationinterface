@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.Concurrent;
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
      class StoredDataSnap
     {

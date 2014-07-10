@@ -114,6 +114,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// 一只证券可能具有0个或多个状态
         /// </remarks>
+         [XmlParseInfo("SecurityStatus", "Status")]
         public List<SecurityStatus> Status { get; set; }
 
         /// <summary>

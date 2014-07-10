@@ -6,7 +6,8 @@ using System.Runtime.InteropServices;
 
 namespace QuotV5.Binary
 {
-    public struct Logout
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct Logout : IMessage
     {
         /// <summary>
         /// 
@@ -15,5 +16,10 @@ namespace QuotV5.Binary
         
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 200)]
         public string Text;
+
+        public MsgType MsgType
+        {
+            get { return MsgType.Logout; }
+        }
     }
 }

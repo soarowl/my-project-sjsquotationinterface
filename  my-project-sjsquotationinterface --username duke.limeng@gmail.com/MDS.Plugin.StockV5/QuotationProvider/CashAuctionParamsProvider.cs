@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
 
-    public class CashAuctionParamsProvider : StaticInfoProvider<QuotV5.StaticInfo.CashAuctionParams>
+    public class CashAuctionParamsProvider : StaticInfoProviderBase<QuotV5.StaticInfo.CashAuctionParams>
     {
         public CashAuctionParamsProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper) : base(config, logHelper) { }
         QuotV5.StaticInfo.CashAuctionParamsParser parser = new QuotV5.StaticInfo.CashAuctionParamsParser();
@@ -19,6 +19,11 @@ namespace MDS.Plugin.StockV5
             {
                 try
                 {
+                    if (!FileModifyTimeChanged(filePath))
+                    {
+                        this.logHelper.LogDebugMsg("文件最后修改时间无变化，FilePath={0}", filePath);
+                        return;
+                    }
                     string fileContent = ReadAllText(filePath, encoding);
 
                     if (fileContent == this.lastScanFileContent)

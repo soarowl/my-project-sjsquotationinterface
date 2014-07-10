@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Configuration Namespace="MDS.Plugin.SZQuotV5">
+  <Plugin Logger="SZQuotV5"></Plugin>
+
+  <StaticInfoFiles>
+    <StaticInfoFile Key="Securities"  Path="\\172.16.1.99\StaticInfo\securities_{YYYYMMDD}.xml" ScanInterval="0:1:0" />
+    <StaticInfoFile Key="IndexInfo"  Path="\\172.16.1.99\StaticInfo\indexinfo_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
+    <StaticInfoFile Key="CashAuctionParams" Path="\\172.16.1.99\StaticInfo\cashauctionparams_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
+    <StaticInfoFile Key="DerivativeAuctionParams" Path="\\172.16.1.99\StaticInfo\derivativeauctionparams_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
+    <StaticInfoFile Key="NegotiationParams" Path="\\172.16.1.99\StaticInfo\negotiationparams_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
+    <StaticInfoFile Key="SecurityCloseMD" Path="\\172.16.1.99\StaticInfo\securityclosemd_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
+  </StaticInfoFiles>
+
+  <BinaryConnections>
+    <BinaryConnection Key="Realtime" IP="172.16.1.99" Port="8016" TargetCompID="N4005Q0001" SenderCompID="realtime" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
+    <BinaryConnection Key="Resend" IP="172.16.1.99" Port="8017" TargetCompID="N4005Q0001" SenderCompID="resend" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
+  </BinaryConnections>
+
+  <ActiveMQ Address="192.168.1.164:61616" RecordsPerPackage  ="1000" ></ActiveMQ>
+</Configuration>

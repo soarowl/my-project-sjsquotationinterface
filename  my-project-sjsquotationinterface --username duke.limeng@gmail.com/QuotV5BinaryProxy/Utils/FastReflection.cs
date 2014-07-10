@@ -170,20 +170,20 @@ namespace QuotV5
                 return null;
 
             Type expectedItemType = listType.GetGenericArguments().First();
-            if (expectedItemType != itemType)
-                return null;
+            //if (expectedItemType != itemType)
+            //    return null;
 
             ParameterExpression listParamExpression = Expression.Parameter(typeof(object), "list");
             ParameterExpression itemParamExpression = Expression.Parameter(typeof(object), "item");
             MethodInfo mi = listType.GetMethod("Add");
             Expression castListParaExpression = GetCastOrConvertExpression(listParamExpression, listType);
-            Expression castItemParaExpression = GetCastOrConvertExpression(itemParamExpression, itemType);
-
+            //Expression castItemParaExpression = GetCastOrConvertExpression(itemParamExpression, itemType);
+            Expression castItemParaExpression = GetCastOrConvertExpression(itemParamExpression, expectedItemType);
+          
             Action<object, object> result = Expression.Lambda<Action<object, object>>
-                (
-                   Expression.Call(castListParaExpression, mi, castItemParaExpression), listParamExpression, itemParamExpression
-                ).Compile();
-
+             (
+                Expression.Call(castListParaExpression, mi, castItemParaExpression), listParamExpression, itemParamExpression
+             ).Compile();
             return result;
         }
 

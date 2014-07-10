@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics.Contracts;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     public class QuotationManager
     {
+        private Status currentStatus = Status.Stopped;
         private Log4cb.ILog4cbHelper logHelper;
         private QuotV5.Binary.RealTimeQuotConnection quotConn;
         private QuotationRepository quotRepository;
@@ -21,53 +22,98 @@ namespace MDS.Plugin.StockV5
         private SecurityCloseMDProvider securityCloseMDProvider;
 
         private object syncUpdateStaticInfoSnap = new object();
+        private object syncRunningStatus = new object();
         public QuotationManager(
             QuotV5.Binary.RealTimeQuotConnection quotConn,
             QuotationRepository quotRepository,
             QuotationMQPublisher quotPublisher,
+            SecurityInfoProvider securityInfoProvider,
+            IndexInfoProvider indexInfoProvider,
+            CashAuctionParamsProvider cashAuctionParamsProvider,
+           DerivativeAuctionParamsProvider derivativeAuctionParamsProvider,
+            NegotiationParamsProvider negotiationParamsProvider,
+            SecurityCloseMDProvider securityCloseMDProvider,
             Log4cb.ILog4cbHelper logHelper
             )
         {
             this.quotConn = quotConn;
             this.quotRepository = quotRepository;
             this.quotPublisher = quotPublisher;
+            this.securityInfoProvider = securityInfoProvider;
+            this.indexInfoProvider = indexInfoProvider;
+            this.cashAuctionParamsProvider = cashAuctionParamsProvider;
+            this.derivativeAuctionParamsProvider = derivativeAuctionParamsProvider;
+            this.negotiationParamsProvider = negotiationParamsProvider;
+            this.securityCloseMDProvider = securityCloseMDProvider;
             this.logHelper = logHelper;
 
             this.quotConn.OnMarketDataReceived += new Action<QuotV5.Binary.IMarketData>(QuotConn_OnMarketDataReceived);
-
             this.securityInfoProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.SecurityInfoBase>>(SecurityInfoProvider_OnStaticInfoRead);
             this.indexInfoProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.IndexInfo>>(IndexInfoProvider_OnStaticInfoRead);
             this.cashAuctionParamsProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.CashAuctionParams>>(CashAuctionParamsProvider_OnStaticInfoRead);
-            this.derivativeAuctionParamsProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.DerivativeAuctionParams>>(DerivativeAuctionParamsProvider_OnStaticInfoRead);
+            //this.derivativeAuctionParamsProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.DerivativeAuctionParams>>(DerivativeAuctionParamsProvider_OnStaticInfoRead);
             this.negotiationParamsProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.NegotiationParams>>(NegotiationParamsProvider_OnStaticInfoRead);
-            this.securityCloseMDProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.SecurityCloseMD>>(SecurityCloseMDProvider_OnStaticInfoRead);
+            //this.securityCloseMDProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.SecurityCloseMD>>(SecurityCloseMDProvider_OnStaticInfoRead);
         }
-
-
-
 
         public void Start()
         {
-            TryLoadStoredDataSnap();
+            lock (syncRunningStatus)
+            {
+                if (this.currentStatus == Status.Started)
+                    return;
+                this.currentStatus = Status.Startting;
+                RawQuotationInfoSnap.ClearAll();
+                RawStaticInfoSnap.ClearAll();
+                TryLoadStoredDataSnap();
+
+                this.quotConn.Start();
+                this.securityInfoProvider.Start();
+                this.indexInfoProvider.Start();
+                this.cashAuctionParamsProvider.Start();
+                this.derivativeAuctionParamsProvider.Start();
+                this.negotiationParamsProvider.Start();
+                this.securityCloseMDProvider.Start();
+                this.currentStatus = Status.Started;
+            }
         }
 
         public void Stop()
         {
-            RawQuotationInfoSnap.ClearAll();
-            RawStaticInfoSnap.ClearAll();
+            lock (syncRunningStatus)
+            {
+                if (this.currentStatus == Status.Stopped)
+                    return;
+                this.currentStatus = Status.Stopping;
+                this.quotConn.Stop();
+                this.securityInfoProvider.Stop();
+                this.indexInfoProvider.Stop();
+                this.cashAuctionParamsProvider.Stop();
+                this.derivativeAuctionParamsProvider.Stop();
+                this.negotiationParamsProvider.Stop();
+                this.securityCloseMDProvider.Stop();
+                this.currentStatus = Status.Stopped;
+            }
         }
+
 
         private void TryLoadStoredDataSnap()
         {
             try
             {
                 var allStockInfos = this.quotRepository.GetAllStockInfo();
-                StoredDataSnap.StockInfo.Clear();
+                ProcessedDataSnap.StockInfo.Clear();
+
                 if (allStockInfos != null)
                 {
                     foreach (var bi in allStockInfos)
                     {
-                        StoredDataSnap.StockInfo[bi.stkId] = bi;
+                        if (!string.IsNullOrEmpty(bi.stkId))
+                            ProcessedDataSnap.StockInfo[bi.stkId] = bi;
+                        else
+                        {
+                            this.logHelper.LogErrMsg("bi.stkId==null");
+                        }
                     }
                 }
             }
@@ -79,12 +125,12 @@ namespace MDS.Plugin.StockV5
             {
 
                 var allQuotInfos = this.quotRepository.GetAllQuotationInfo();
-                StoredDataSnap.QuotationInfo.Clear();
+                ProcessedDataSnap.QuotationInfo.Clear();
                 if (allQuotInfos != null)
                 {
                     foreach (var qi in allQuotInfos)
                     {
-                        StoredDataSnap.QuotationInfo[qi.stkId] = qi;
+                        ProcessedDataSnap.QuotationInfo[qi.stkId] = qi;
                     }
                 }
             }
@@ -93,7 +139,6 @@ namespace MDS.Plugin.StockV5
                 this.logHelper.LogErrMsg(ex, "从Redis中读取QuotationInfo快照异常");
             }
         }
-
 
 
         #region 静态信息更新
@@ -116,7 +161,7 @@ namespace MDS.Plugin.StockV5
             StockInfo preStockInfo = null;
             StockInfo newStockInfo = null;
 
-            if (StoredDataSnap.StockInfo.TryGetValue(securityInfo.CommonInfo.SecurityID, out preStockInfo))
+            if (ProcessedDataSnap.StockInfo.TryGetValue(securityInfo.CommonInfo.SecurityID, out preStockInfo))
             {
                 newStockInfo = preStockInfo.Clone();
                 SetStockInfoProperty(newStockInfo, securityInfo);
@@ -129,9 +174,9 @@ namespace MDS.Plugin.StockV5
 
             if (newStockInfo != null)
             {
-                StoredDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
+                ProcessedDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
                 quotRepository.UpdateBasicInfo(newStockInfo);
-                quotPublisher.Publish(newStockInfo);
+
             }
         }
 
@@ -153,7 +198,7 @@ namespace MDS.Plugin.StockV5
             StockInfo preStockInfo = null;
             StockInfo newStockInfo = null;
 
-            if (StoredDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
+            if (ProcessedDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
             {
                 newStockInfo = preStockInfo.Clone();
                 SetStockInfoProperty(newStockInfo, securityInfo);
@@ -166,9 +211,9 @@ namespace MDS.Plugin.StockV5
 
             if (newStockInfo != null)
             {
-                StoredDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
+                ProcessedDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
                 quotRepository.UpdateBasicInfo(newStockInfo);
-                quotPublisher.Publish(newStockInfo);
+
             }
         }
 
@@ -190,7 +235,7 @@ namespace MDS.Plugin.StockV5
             StockInfo preStockInfo = null;
             StockInfo newStockInfo = null;
 
-            if (StoredDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
+            if (ProcessedDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
             {
                 newStockInfo = preStockInfo.Clone();
                 SetStockInfoProperty(newStockInfo, securityInfo);
@@ -203,9 +248,9 @@ namespace MDS.Plugin.StockV5
 
             if (newStockInfo != null)
             {
-                StoredDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
+                ProcessedDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
                 quotRepository.UpdateBasicInfo(newStockInfo);
-                quotPublisher.Publish(newStockInfo);
+
             }
         }
 
@@ -227,7 +272,7 @@ namespace MDS.Plugin.StockV5
             StockInfo preStockInfo = null;
             StockInfo newStockInfo = null;
 
-            if (StoredDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
+            if (ProcessedDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
             {
                 newStockInfo = preStockInfo.Clone();
                 SetStockInfoProperty(newStockInfo, securityInfo);
@@ -235,13 +280,14 @@ namespace MDS.Plugin.StockV5
             else
             {
                 newStockInfo = new StockInfo();
+                SetStockInfoProperty(newStockInfo, securityInfo);
             }
 
             if (newStockInfo != null)
             {
-                StoredDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
+                ProcessedDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
                 quotRepository.UpdateBasicInfo(newStockInfo);
-                quotPublisher.Publish(newStockInfo);
+
             }
         }
 
@@ -264,7 +310,7 @@ namespace MDS.Plugin.StockV5
             StockInfo preStockInfo = null;
             StockInfo newStockInfo = null;
 
-            if (StoredDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
+            if (ProcessedDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
             {
                 newStockInfo = preStockInfo.Clone();
                 SetStockInfoProperty(newStockInfo, securityInfo);
@@ -277,12 +323,12 @@ namespace MDS.Plugin.StockV5
 
             if (newStockInfo != null)
             {
-                StoredDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
+                ProcessedDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
                 quotRepository.UpdateBasicInfo(newStockInfo);
-                quotPublisher.Publish(newStockInfo);
+
             }
         }
-       
+
         private void SecurityCloseMDProvider_OnStaticInfoRead(List<QuotV5.StaticInfo.SecurityCloseMD> securityInfos)
         {
             if (securityInfos == null)
@@ -291,7 +337,7 @@ namespace MDS.Plugin.StockV5
             {
                 foreach (var securityInfo in securityInfos)
                 {
-                   ProcessStaticInfo(securityInfo);
+                    ProcessStaticInfo(securityInfo);
                 }
             }
         }
@@ -301,7 +347,7 @@ namespace MDS.Plugin.StockV5
             StockInfo preStockInfo = null;
             StockInfo newStockInfo = null;
 
-            if (StoredDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
+            if (ProcessedDataSnap.StockInfo.TryGetValue(securityInfo.SecurityID, out preStockInfo))
             {
                 newStockInfo = preStockInfo.Clone();
                 SetStockInfoProperty(newStockInfo, securityInfo);
@@ -314,9 +360,9 @@ namespace MDS.Plugin.StockV5
 
             if (newStockInfo != null)
             {
-                StoredDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
+                ProcessedDataSnap.StockInfo[newStockInfo.stkId] = newStockInfo;
                 quotRepository.UpdateBasicInfo(newStockInfo);
-                quotPublisher.Publish(newStockInfo);
+
             }
         }
         #endregion
@@ -325,7 +371,6 @@ namespace MDS.Plugin.StockV5
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.SecurityInfoBase securityInfo)
         {
-
             stockInfo.stkId = securityInfo.CommonInfo.SecurityID;
             stockInfo.stkName = securityInfo.CommonInfo.Symbol;
             stockInfo.stkEnglishtAbbr = securityInfo.CommonInfo.EnglishName;
@@ -365,6 +410,7 @@ namespace MDS.Plugin.StockV5
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.IndexInfo securityInfo)
         {
+
             stockInfo.stkId = securityInfo.SecurityID;
             stockInfo.stkName = securityInfo.Symbol;
             stockInfo.stkEnglishtAbbr = securityInfo.EnglishName;
@@ -373,6 +419,7 @@ namespace MDS.Plugin.StockV5
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.CashAuctionParams cashAuctionParams)
         {
+            stockInfo.stkId = cashAuctionParams.SecurityID;
             stockInfo.buyQtyUpperLimit = (int)cashAuctionParams.BuyQtyUpperLimit;
             stockInfo.sellQtyUpperLimit = (int)cashAuctionParams.SellQtyUpperLimit;
             stockInfo.orderPriceUnit = cashAuctionParams.PriceTick;
@@ -381,6 +428,7 @@ namespace MDS.Plugin.StockV5
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.DerivativeAuctionParams derivativeAuctionParams)
         {
+            stockInfo.stkId = derivativeAuctionParams.SecurityID;
             stockInfo.buyQtyUpperLimit = (int)derivativeAuctionParams.BuyQtyUpperLimit;
             stockInfo.sellQtyUpperLimit = (int)derivativeAuctionParams.SellQtyUpperLimit;
             stockInfo.orderPriceUnit = derivativeAuctionParams.PriceTick;
@@ -389,11 +437,12 @@ namespace MDS.Plugin.StockV5
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.NegotiationParams negotiationParams)
         {
-
+            stockInfo.stkId = negotiationParams.SecurityID;
         }
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.SecurityCloseMD securityCloseMD)
         {
+            stockInfo.stkId = securityCloseMD.SecurityID;
             stockInfo.exchTotalKnockAmt = securityCloseMD.TotalValueTrade;
             stockInfo.exchTotalKnockQty = (Int64)securityCloseMD.TotalVolumeTrade;
         }
@@ -430,7 +479,7 @@ namespace MDS.Plugin.StockV5
             RawQuotationInfoSnap.QuotSnap300111[quotSnap.CommonInfo.SecurityID] = quotSnap;
             QuotationInfo preQuotInfo = null;
             QuotationInfo newQuotInfo = null;
-            if (StoredDataSnap.QuotationInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
+            if (ProcessedDataSnap.QuotationInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
             {
                 newQuotInfo = preQuotInfo.Clone();
                 SetQuotInfoProperty(newQuotInfo, quotSnap);
@@ -451,9 +500,10 @@ namespace MDS.Plugin.StockV5
             }
             if (newQuotInfo != null)
             {
-                StoredDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
+                ProcessedDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
                 quotRepository.UpdateQuotInfo(newQuotInfo);
-                quotPublisher.Publish(newQuotInfo);
+                if (quotPublisher != null)
+                    quotPublisher.Enqueue(newQuotInfo, true);
             }
         }
 
@@ -462,7 +512,7 @@ namespace MDS.Plugin.StockV5
             RawQuotationInfoSnap.QuotSnap300611[quotSnap.CommonInfo.SecurityID] = quotSnap;
             QuotationInfo preQuotInfo = null;
             QuotationInfo newQuotInfo = null;
-            if (StoredDataSnap.QuotationInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
+            if (ProcessedDataSnap.QuotationInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
             {
                 newQuotInfo = preQuotInfo.Clone();
                 SetQuotInfoProperty(newQuotInfo, quotSnap);
@@ -486,9 +536,10 @@ namespace MDS.Plugin.StockV5
             }
             if (newQuotInfo != null)
             {
-                StoredDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
+                ProcessedDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
                 quotRepository.UpdateQuotInfo(newQuotInfo);
-                quotPublisher.Publish(newQuotInfo);
+                if (quotPublisher != null)
+                    quotPublisher.Enqueue(newQuotInfo, true);
             }
         }
 
@@ -497,7 +548,7 @@ namespace MDS.Plugin.StockV5
             RawQuotationInfoSnap.QuotSnap309011[quotSnap.CommonInfo.SecurityID] = quotSnap;
             QuotationInfo preQuotInfo = null;
             QuotationInfo newQuotInfo = null;
-            if (StoredDataSnap.QuotationInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
+            if (ProcessedDataSnap.QuotationInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
             {
                 newQuotInfo = preQuotInfo.Clone();
                 SetQuotInfoProperty(newQuotInfo, quotSnap);
@@ -518,9 +569,10 @@ namespace MDS.Plugin.StockV5
             }
             if (newQuotInfo != null)
             {
-                StoredDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
+                ProcessedDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
                 quotRepository.UpdateQuotInfo(newQuotInfo);
-                quotPublisher.Publish(newQuotInfo);
+                if (quotPublisher != null)
+                    quotPublisher.Enqueue(newQuotInfo, true);
             }
         }
 
@@ -529,7 +581,7 @@ namespace MDS.Plugin.StockV5
             RawQuotationInfoSnap.RealtimeStatus[status.Status.SecurityID] = status;
             QuotationInfo preQuotInfo = null;
             QuotationInfo newQuotInfo = null;
-            if (StoredDataSnap.QuotationInfo.TryGetValue(status.Status.SecurityID, out preQuotInfo))
+            if (ProcessedDataSnap.QuotationInfo.TryGetValue(status.Status.SecurityID, out preQuotInfo))
             {
                 newQuotInfo = preQuotInfo.Clone();
                 SetQuotInfoProperty(newQuotInfo, status);
@@ -555,9 +607,10 @@ namespace MDS.Plugin.StockV5
             }
             if (newQuotInfo != null)
             {
-                StoredDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
+                ProcessedDataSnap.QuotationInfo[newQuotInfo.stkId] = newQuotInfo;
                 quotRepository.UpdateQuotInfo(newQuotInfo);
-                quotPublisher.Publish(newQuotInfo);
+                if (quotPublisher != null)
+                    quotPublisher.Enqueue(newQuotInfo, true);
             }
         }
         #endregion
@@ -577,14 +630,15 @@ namespace MDS.Plugin.StockV5
 
         private void SetQuotInfoProperty(QuotationInfo quotInfo, QuotV5.Binary.RealtimeStatus status)
         {
+            quotInfo.stkId = status.Status.SecurityID;
             quotInfo.stkIdPrefix = status.Status.SecurityPreName;
             if (!string.IsNullOrEmpty(status.Status.SecurityPreName))
             {
-                quotInfo.closeFlag = status.Status.SecurityPreName.FirstOrDefault();
+                quotInfo.closeFlag = status.Status.SecurityPreName.Substring(0, 1);
 
                 if (status.Status.SecurityPreName.Length > 1)
                 {
-                    quotInfo.passCreditCashStk = status.Status.SecurityPreName.Skip(1).Take(1).First();
+                    quotInfo.passCreditCashStk = status.Status.SecurityPreName.Substring(1, 1);
                     quotInfo.passCreditShareStk = quotInfo.passCreditCashStk;
                 }
             }
@@ -814,6 +868,15 @@ namespace MDS.Plugin.StockV5
         }
         #endregion
 
+
+
+        enum Status
+        {
+            Stopped,
+            Stopping,
+            Started,
+            Startting
+        }
     }
 
 

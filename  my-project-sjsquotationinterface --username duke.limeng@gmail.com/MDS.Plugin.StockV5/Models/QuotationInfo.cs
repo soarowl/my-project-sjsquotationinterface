@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     public class QuotationInfo
     {
+        public QuotationInfo() 
+        {
+            this.exchId = "1";
+        }
         /// <summary>
         /// 市场代码
         /// </summary>
@@ -179,12 +183,12 @@ namespace MDS.Plugin.StockV5
         /// <summary>
         /// MDS 收到行情的时间
         /// </summary>
-        public Int64 ReceiveTime{get;set;}
+        public Int64 receiveTime{get;set;}
 
         /// <summary>
         /// MDS将行情推到MQ的时间
         /// </summary>
-        public Int64 SendTime{get;set;}
+        public Int64 sendTime{get;set;}
 
         public QuotationInfo Clone()
         {

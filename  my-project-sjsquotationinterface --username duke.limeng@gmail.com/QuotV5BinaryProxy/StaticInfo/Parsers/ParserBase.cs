@@ -30,8 +30,16 @@ namespace QuotV5.StaticInfo
                 if (property.PropertyType.IsGenericType)
                 {
                     XmlParseInfoAttribute parseInfo = XmlParseInfoAttribute.GetAttribute(property);
-                    var value = ParseList(property.PropertyType, node, parseInfo.NodeName, parseInfo.ChildNodeName);
-                    FastReflection.SetPropertyValue<object>(rtn, property, value);
+                    if (parseInfo == null)
+                    {
+                        throw new Exception(string.Format("{1}.{0}未定义XmlParseInfoAttribute", property.Name, property.DeclaringType.Name));
+
+                    }
+                    else
+                    {
+                        var value = ParseList(property.PropertyType, node, parseInfo.NodeName, parseInfo.ChildNodeName);
+                        FastReflection.SetPropertyValue<object>(rtn, property, value);
+                    }
                 }
                 else
                 {
@@ -111,62 +119,77 @@ namespace QuotV5.StaticInfo
 
         protected object ParseNode(Type returnType, XContainer node)
         {
-            var properties = returnType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
 
-            object rtn = ObjectCreator.Create(returnType, Type.EmptyTypes, null);
-
-            foreach (var property in properties)
+            if (returnType.IsEnum)
             {
-                string valueStr = ReadValueStr(node, property.Name);
+                string valueStr = (node as XElement).Value;
+                int value = 0;
                 if (!string.IsNullOrEmpty(valueStr))
                 {
-                    if (property.PropertyType == typeof(string))
-                    {
-                        FastReflection.SetPropertyValue<string>(rtn, property, valueStr);
-                    }
-                    else if (property.PropertyType == typeof(Int32))
-                    {
-                        int value = DataHelper.TryParseInt32(valueStr);
-                        FastReflection.SetPropertyValue<Int32>(rtn, property, value);
-                    }
-                    else if (property.PropertyType == typeof(Int64))
-                    {
-                        Int64 value = DataHelper.TryParseInt64(valueStr);
-                        FastReflection.SetPropertyValue<Int64>(rtn, property, value);
-                    }
-                    else if (property.PropertyType == typeof(Double))
-                    {
-                        Double value = DataHelper.TryParseDouble(valueStr);
-                        FastReflection.SetPropertyValue<Double>(rtn, property, value);
-                    }
-                    else if (property.PropertyType == typeof(Decimal))
-                    {
-                        Decimal value = DataHelper.TryParseDecimal(valueStr);
-                        FastReflection.SetPropertyValue<Decimal>(rtn, property, value);
-                    }
-                    else if (property.PropertyType == typeof(Boolean))
-                    {
-                        Boolean value = DataHelper.TryParseBoolean(valueStr);
-                        FastReflection.SetPropertyValue<Boolean>(rtn, property, value);
-                    }
-                    else if (property.PropertyType.IsEnum)
-                    {
-                        int value = DataHelper.TryParseInt32(valueStr);
+                    value = DataHelper.TryParseInt32(valueStr);
+                }
+                return value;
+            }
+            else
+            {
 
-                        if (Enum.IsDefined(property.PropertyType, value))
+                var properties = returnType.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+
+                object rtn = ObjectCreator.Create(returnType, Type.EmptyTypes, null);
+
+                foreach (var property in properties)
+                {
+                    string valueStr = ReadValueStr(node, property.Name);
+                    if (!string.IsNullOrEmpty(valueStr))
+                    {
+                        if (property.PropertyType == typeof(string))
                         {
-                            FastReflection.SetPropertyValue<object>(rtn, property, value);
+                            FastReflection.SetPropertyValue<string>(rtn, property, valueStr);
+                        }
+                        else if (property.PropertyType == typeof(Int32))
+                        {
+                            int value = DataHelper.TryParseInt32(valueStr);
+                            FastReflection.SetPropertyValue<Int32>(rtn, property, value);
+                        }
+                        else if (property.PropertyType == typeof(Int64))
+                        {
+                            Int64 value = DataHelper.TryParseInt64(valueStr);
+                            FastReflection.SetPropertyValue<Int64>(rtn, property, value);
+                        }
+                        else if (property.PropertyType == typeof(Double))
+                        {
+                            Double value = DataHelper.TryParseDouble(valueStr);
+                            FastReflection.SetPropertyValue<Double>(rtn, property, value);
+                        }
+                        else if (property.PropertyType == typeof(Decimal))
+                        {
+                            Decimal value = DataHelper.TryParseDecimal(valueStr);
+                            FastReflection.SetPropertyValue<Decimal>(rtn, property, value);
+                        }
+                        else if (property.PropertyType == typeof(Boolean))
+                        {
+                            Boolean value = DataHelper.TryParseBoolean(valueStr);
+                            FastReflection.SetPropertyValue<Boolean>(rtn, property, value);
+                        }
+                        else if (property.PropertyType.IsEnum)
+                        {
+                            int value = DataHelper.TryParseInt32(valueStr);
+
+                            if (Enum.IsDefined(property.PropertyType, value))
+                            {
+                                FastReflection.SetPropertyValue<object>(rtn, property, value);
+                            }
                         }
                     }
+                    else if (property.PropertyType.IsGenericType)
+                    {
+                        XmlParseInfoAttribute parseInfo = XmlParseInfoAttribute.GetAttribute(property);
+                        var value = ParseList(property.PropertyType, node, parseInfo.NodeName, parseInfo.ChildNodeName);
+                        FastReflection.SetPropertyValue<object>(rtn, property, value);
+                    }
                 }
-                else if (property.PropertyType.IsGenericType)
-                {
-                    XmlParseInfoAttribute parseInfo = XmlParseInfoAttribute.GetAttribute(property);
-                    var value = ParseList(property.PropertyType, node, parseInfo.NodeName, parseInfo.ChildNodeName);
-                    FastReflection.SetPropertyValue<object>(rtn, property, value);
-                }
+                return rtn;
             }
-            return rtn;
         }
 
         protected object ParseList(Type listType, XContainer node, string rootNodeName, string childNodeName)
@@ -196,7 +219,7 @@ namespace QuotV5.StaticInfo
                 return null;
             }
         }
-        
+
         protected static string ReadValueStr(XContainer securityInfoNode, string propertyName)
         {
             if (securityInfoNode.Element(propertyName) != null)

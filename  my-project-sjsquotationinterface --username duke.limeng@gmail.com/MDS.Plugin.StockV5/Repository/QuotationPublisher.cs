@@ -6,7 +6,7 @@ using System.Diagnostics;
 using ServiceManager.Services;
 using System.Collections;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
     /// <summary>
     /// 行情订阅发布者

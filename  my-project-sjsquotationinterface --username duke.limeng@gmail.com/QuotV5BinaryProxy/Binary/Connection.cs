@@ -7,6 +7,7 @@ using System.Threading;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using ServiceManager.Utils;
+using System.Collections.Concurrent;
 namespace QuotV5.Binary
 {
     public class ConnectionBase
@@ -15,7 +16,7 @@ namespace QuotV5.Binary
         protected Log4cb.ILog4cbHelper logHelper;
         protected object connSyncObj = new object();
         protected static int tailSize = Marshal.SizeOf(typeof(Trailer));
-        
+
 
         /// <summary>
         /// 消息包头长度
@@ -51,7 +52,7 @@ namespace QuotV5.Binary
         protected TcpClient tcpClient;
 
 
-        protected bool connected;
+        protected bool marketDataReceiveThreadStarted = false;
 
         public ConnectionBase(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
         {
@@ -69,7 +70,7 @@ namespace QuotV5.Binary
                 this.CurrentStatus = Status.Starting;
                 this.stopEvent.Reset();
                 this.tcpDisconnectedEvent.Reset();
-                this.receiveThreadExitEvent.Reset();
+                // this.receiveThreadExitEvent.Reset();
                 CreateConnectionThread();
                 this.CurrentStatus = Status.Started;
                 this.logHelper.LogInfoMsg("Connection Started");
@@ -87,9 +88,9 @@ namespace QuotV5.Binary
                     this.logHelper.LogInfoMsg("Connection Stopping");
                     this.CurrentStatus = Status.Stopping;
                     this.stopEvent.Set();
-                    if (this.connected)
+                    if (this.marketDataReceiveThreadStarted)
                         this.receiveThreadExitEvent.WaitOne();
-                    this.tcpClient.Close();
+                    Disconnect();
                 }
                 catch (Exception ex)
                 {
@@ -118,12 +119,20 @@ namespace QuotV5.Binary
         /// </summary>
         protected void ConnAndLogon()
         {
+            this.logHelper.LogInfoMsg("ConnThread线程启动");
             while (true)
             {
                 Disconnect();
-                TcpClient tcpClient = ConnectToServer();
+                if (this.stopEvent.WaitOne(0))
+                    break;
+                if (this.marketDataReceiveThreadStarted)
+                {
+                    int index = WaitHandle.WaitAny(new WaitHandle[] { this.stopEvent, this.receiveThreadExitEvent });
+                    if (index == 0)
+                        break;
+                }
 
-                bool succeed = false;
+                TcpClient tcpClient = ConnectToServer();
 
                 if (tcpClient != null)
                 {
@@ -133,21 +142,25 @@ namespace QuotV5.Binary
                     Logon logonAns;
                     if (Logon(out logonAns))
                     {
-                        succeed = true;
+                        OnLogonSucceed();
+                        int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent });
+                        if (index == 0)
+                        {
+                            break;
+                        }
                     }
-                }
-                if (succeed)
-                {
-                    OnLogonSucceed();
-                    int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent });
-                    if (index == 0)
+                    else
                     {
-                        break;
+                        int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent }, this.config.ReconnectIntervalMS);
+                        if (index == 0)
+                        {
+                            break;
+                        }
                     }
                 }
-                if (!succeed)
+                else
                 {
-                    this.logHelper.LogErrMsg(string.Format("Tcp连接失败，IP={0},Port={1}", this.config.IP, this.config.Port));
+                    this.logHelper.LogWarnMsg(string.Format("Tcp连接失败，IP={0},Port={1}", this.config.IP, this.config.Port));
                     int index = AutoResetEvent.WaitAny(new WaitHandle[] { this.stopEvent }, this.config.ReconnectIntervalMS);
                     if (index == 0)
                     {
@@ -155,6 +168,7 @@ namespace QuotV5.Binary
                     }
                 }
             }
+            this.logHelper.LogInfoMsg("ConnThread线程退出");
         }
 
 
@@ -216,8 +230,6 @@ namespace QuotV5.Binary
         }
 
 
-
-
         /// <summary>
         /// 连接服务器
         ///     采用异步方式等待连接事件，避免因服务器未开启而耗费过长时间等待
@@ -228,7 +240,8 @@ namespace QuotV5.Binary
             TcpClient newTcpClient = new TcpClient();
             newTcpClient.Client.ReceiveBufferSize = 1024 * 1024 * 100;
             newTcpClient.NoDelay = true;
-            newTcpClient.ReceiveTimeout = 5;
+            newTcpClient.ReceiveTimeout = milliSecondsTimeout;
+            newTcpClient.SendTimeout = milliSecondsTimeout;
             IAsyncResult result = null;
 
             try
@@ -251,7 +264,7 @@ namespace QuotV5.Binary
                     return null;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (newTcpClient != null) newTcpClient.Close();
                 if (result != null) result.AsyncWaitHandle.Close();
@@ -290,6 +303,7 @@ namespace QuotV5.Binary
             }
         }
 
+
         /// <summary>
         /// 发送登录请求
         /// </summary>
@@ -310,7 +324,6 @@ namespace QuotV5.Binary
         }
 
 
-
         /// <summary>
         /// 接收登录应答
         /// </summary>
@@ -329,6 +342,70 @@ namespace QuotV5.Binary
             {
                 var logout = BigEndianStructHelper<Logout>.BytesToStruct(ans.BodyData, MsgConsts.MsgEncoding);
                 this.logHelper.LogErrMsg("登录失败：{0}", logout.Text);
+                return null;
+            }
+            else
+                return null;
+        }
+
+
+
+
+
+
+
+        protected bool Logout()
+        {
+            bool sendLogoutSucceed = SendLogoutRequest();
+
+            if (sendLogoutSucceed)
+            {
+                var answer = ReceiveLogoutAnswer();
+                if (answer != null)
+                {
+                    this.logHelper.LogInfoMsg("行情网关登出成功");
+                    return true;
+                }
+                else
+                {
+                    this.logHelper.LogInfoMsg("行情网关登出失败");
+                    return false;
+                }
+            }
+            else
+            {
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 发送登录请求
+        /// </summary>
+        /// <returns></returns>
+        protected bool SendLogoutRequest()
+        {
+            Logout logoutReq = new Binary.Logout()
+            {
+            };
+            var bytes = MessageHelper.ComposeMessage<Logout>(logoutReq);
+            bool succeed = SocketSend(bytes);
+            this.logHelper.LogInfoMsg("发送Logout,Succeed={0}", succeed);
+            return succeed;
+        }
+        /// <summary>
+        /// 接收登录应答
+        /// </summary>
+        /// <returns></returns>
+        protected Logout? ReceiveLogoutAnswer()
+        {
+            var ans = ReceiveMessage();
+
+
+            if (ans != null && ans.Header.Type == (UInt32)MsgType.Logout)
+            {
+                var logout = BigEndianStructHelper<Logout>.BytesToStruct(ans.BodyData, MsgConsts.MsgEncoding);
+                this.logHelper.LogErrMsg("登出成功：{0}", logout.Text);
                 return null;
             }
             else
@@ -357,28 +434,38 @@ namespace QuotV5.Binary
                     return null;
 
                 messageData = new MessagePack(headerBytes);
-                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1}", messageData.Header.Type, messageData.Header.BodyLength);
+                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1},threadId={2}", messageData.Header.Type, messageData.Header.BodyLength, Thread.CurrentThread.ManagedThreadId);
 
-                if (!Enum.IsDefined(typeof(MsgType), (int)messageData.Header.Type))
+                //if (!Enum.IsDefined(typeof(MsgType), (int)messageData.Header.Type))
+                //    return null;
+
+                if (messageData.Header.BodyLength > 2000)
+                {
+                    this.logHelper.LogWarnMsg("数据包头中指示的数据长度异常");
+                    //Logout();
+                    //Disconnect();
+                    this.tcpDisconnectedEvent.Set();
                     return null;
+                }
 
                 if (messageData.Header.BodyLength > 0)
                 {
                     messageData.BodyData = SocketReceive(this.tcpClient, (int)messageData.Header.BodyLength);
-                    messageData.TailData = SocketReceive(this.tcpClient, tailSize);
-                    if (messageData.Validate())
+                    messageData.TrailerData = SocketReceive(this.tcpClient, tailSize);
+                    string msg;
+                    if (messageData.Validate(out msg))
                     {
                         return messageData;
                     }
                     else
                     {
-                        this.logHelper.LogWarnMsg("收到的Message校验错误");
+                        this.logHelper.LogWarnMsg("验证消息：{0},Message:\r\n{1}", msg, messageData.ToLogString());
                         return null;
                     }
                 }
                 else if (messageData.Header.Type == (UInt32)MsgType.Heartbeat)
                 {
-                    messageData.TailData = SocketReceive(this.tcpClient, tailSize);
+                    messageData.TrailerData = SocketReceive(this.tcpClient, tailSize);
                     return messageData;
                 }
                 else
@@ -387,6 +474,8 @@ namespace QuotV5.Binary
             catch (Exception ex)
             {
                 this.logHelper.LogWarnMsg(ex, string.Format("行情网关连接断开，IP={0},Port={1}", this.config.IP, this.config.Port));
+                //Logout();
+                //Disconnect();
                 this.tcpDisconnectedEvent.Set();
                 return null;
             }
@@ -444,6 +533,7 @@ namespace QuotV5.Binary
 
                 if (timeOut)
                 {
+
                     this.logHelper.LogWarnMsg(string.Format("Tcp  接收数据超时，IP={0},Port={1}", this.config.IP, this.config.Port));
                     this.tcpDisconnectedEvent.Set();
                     break;
@@ -521,6 +611,7 @@ namespace QuotV5.Binary
     {
         public event Action<IMarketData> OnMarketDataReceived;
 
+        private ConcurrentQueue<MessagePack> messageQueue = new ConcurrentQueue<MessagePack>();
         public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
             : base(config, logHelper)
         {
@@ -567,16 +658,22 @@ namespace QuotV5.Binary
         /// </summary>
         private void ReceiveMarketData()
         {
+            this.receiveThreadExitEvent.Reset();
+            this.marketDataReceiveThreadStarted = true;
+            this.logHelper.LogInfoMsg("MarketDataReceiveThread线程启动");
             while (true)
             {
-
-                if (this.stopEvent.WaitOne(0))//检查停止事件是否发生
+                var index = WaitHandle.WaitAny(new WaitHandle[] { this.stopEvent, this.tcpDisconnectedEvent }, 0);
+                if (index == 0 || index == 1)
                     break;
                 var msg = ReceiveMessage();
                 if (msg != null)
                     ProcessMessage(msg);
-
             }
+
+            this.marketDataReceiveThreadStarted = false;
+            this.logHelper.LogInfoMsg("MarketDataReceiveThread线程退出");
+            this.receiveThreadExitEvent.Set();
         }
 
         /// <summary>
@@ -590,7 +687,7 @@ namespace QuotV5.Binary
             if (msg.Header.Type == (uint)MsgType.ChannelHeartbeat)
             {
                 ChannelHeartbeat heartbeat = ChannelHeartbeat.Deserialize(msg.BodyData);
-                logMarketData < ChannelHeartbeat>(heartbeat);
+                logMarketData<ChannelHeartbeat>(heartbeat);
             }
             else if (msg.Header.Type == (uint)MsgType.QuotationSnap)
             {
@@ -612,15 +709,15 @@ namespace QuotV5.Binary
                 logMarketData(marketData);
                 RaiseEvent(marketData);
             }
-            
+
         }
 
-    
+
 
         private void logMarketData<TMarketData>(TMarketData marketData)
         {
-            string str=ObjectLogHelper<TMarketData>.ObjectToString(marketData);
-            logHelper.LogDebugMsg("收到数据：\r\n{0}",str);
+            string str = ObjectLogHelper<TMarketData>.ObjectToString(marketData);
+            logHelper.LogDebugMsg("收到数据：\r\n{0}", str);
         }
 
         private void RaiseEvent(IMarketData marketData)

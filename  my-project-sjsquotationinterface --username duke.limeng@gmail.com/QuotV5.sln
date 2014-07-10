@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{67939BAB-471
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDServer", "MDServer\MDServer.csproj", "{862E550C-13E2-4E2C-811F-888D109B009F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDS.Plugin.StockV5", "MDS.Plugin.StockV5\MDS.Plugin.StockV5.csproj", "{2F2FEA5B-034D-4AB6-9607-872601227804}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDS.Plugin.SZQuotV5", "MDS.Plugin.StockV5\MDS.Plugin.SZQuotV5.csproj", "{2F2FEA5B-034D-4AB6-9607-872601227804}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

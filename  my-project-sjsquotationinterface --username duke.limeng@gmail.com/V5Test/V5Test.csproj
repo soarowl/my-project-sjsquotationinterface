@@ -27,7 +27,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,6 +41,9 @@
     </Reference>
     <Reference Include="Log4cb">
       <HintPath>..\QuotV5BinaryProxy\Libs\Log4cb.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceStack.Text">
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceStack.Text.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -56,6 +59,10 @@
     <Compile Include="Test1.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MDS.Plugin.StockV5\MDS.Plugin.SZQuotV5.csproj">
+      <Project>{2F2FEA5B-034D-4AB6-9607-872601227804}</Project>
+      <Name>MDS.Plugin.SZQuotV5</Name>
+    </ProjectReference>
     <ProjectReference Include="..\QuotV5BinaryProxy\QuotV5Proxy.csproj">
       <Project>{3450FD40-CA8A-49C2-AEBB-2877CF2E2593}</Project>
       <Name>QuotV5Proxy</Name>
@@ -66,11 +73,21 @@
     <None Include="Simulator\mdgw_20140618.rar" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Samples\cashauctionparams_20140703.xml" />
-    <Content Include="Samples\derivativeauctionparams_20140703.xml" />
-    <Content Include="Samples\indexinfo_20140703.xml" />
-    <Content Include="Samples\negotiationparams_20140703.xml" />
-    <Content Include="Samples\securities_20140703.xml" />
+    <Content Include="Samples\cashauctionparams_20140703.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\derivativeauctionparams_20140703.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\indexinfo_20140703.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\negotiationparams_20140703.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Samples\securities_20140703.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

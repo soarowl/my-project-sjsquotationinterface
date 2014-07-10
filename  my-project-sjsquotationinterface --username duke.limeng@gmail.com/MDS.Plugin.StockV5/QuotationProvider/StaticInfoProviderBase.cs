@@ -6,9 +6,9 @@ using System.Threading;
 using System.IO;
 using Log4cb;
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
-    public abstract class StaticInfoProvider<TStaticInfo>
+    public abstract class StaticInfoProviderBase<TStaticInfo>
     {
         public event Action<List<TStaticInfo>> OnStaticInfoRead;
         protected  static Encoding encoding = Encoding.UTF8;
@@ -27,7 +27,7 @@ namespace MDS.Plugin.StockV5
         private ManualResetEvent stopEvent = new ManualResetEvent(false);
 
 
-        public StaticInfoProvider(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper)
+        public StaticInfoProviderBase(StaticInfoProviderConfig config, Log4cb.ILog4cbHelper logHelper)
         {
             this.config = config;
             this.logHelper = logHelper;
@@ -97,7 +97,8 @@ namespace MDS.Plugin.StockV5
                     //停止事件发生,退出发送线程
                     if (index == 0)
                     {
-                        this.logHelper.LogInfoMsg("{0}的Provider正常退出", this.config.PathFormat);
+                        this.logHelper.LogInfoMsg("{0}的Provider正常停止", this.config.PathFormat);
+                        this.lastScanFileContent = null;
                         break;
                     }
                     lastStartTime = DateTime.Now;
@@ -163,6 +164,25 @@ namespace MDS.Plugin.StockV5
                 }
             }
 
+        }
+
+
+
+        protected DateTime fileLastModifyTime=default(DateTime);
+
+        protected bool FileModifyTimeChanged(string filePath)
+        {
+
+                var dt = File.GetLastWriteTime(filePath);
+                if (fileLastModifyTime != dt)
+                {
+                    this.fileLastModifyTime = dt;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
         }
 
         /// <summary>

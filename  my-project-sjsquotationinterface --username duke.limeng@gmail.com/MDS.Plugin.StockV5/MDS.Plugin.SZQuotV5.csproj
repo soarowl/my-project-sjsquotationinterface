@@ -8,8 +8,8 @@
     <ProjectGuid>{2F2FEA5B-034D-4AB6-9607-872601227804}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MDS.Plugin.StockV5</RootNamespace>
-    <AssemblyName>MDS.Plugin.StockV5</AssemblyName>
+    <RootNamespace>MDS.Plugin.SZQuotV5</RootNamespace>
+    <AssemblyName>MDS.Plugin.SZQuotV5</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -25,12 +25,18 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\Bins\Release\Plugins\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Apache.NMS">
+      <HintPath>..\QuotV5BinaryProxy\Libs\Apache.NMS.dll</HintPath>
+    </Reference>
+    <Reference Include="Apache.NMS.ActiveMQ">
+      <HintPath>..\QuotV5BinaryProxy\Libs\Apache.NMS.ActiveMQ.dll</HintPath>
+    </Reference>
     <Reference Include="Log4cb">
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\Log4cb.dll</HintPath>
     </Reference>
@@ -47,6 +53,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Kernel\Bins\Release\ServiceStack.Redis.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceStack.Text, Version=3.9.44.0, Culture=neutral, PublicKeyToken=e5d70ba0f6fb5d22, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceStack.Text.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -56,11 +66,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration.cs" />
     <Compile Include="DataSnaps\RawQuotationInfoSnap.cs" />
     <Compile Include="DataSnaps\RawStaticInfoSnap.cs" />
-    <Compile Include="DataSnaps\StoredDataSnap.cs" />
+    <Compile Include="DataSnaps\ProcessedDataSnap.cs" />
+    <Compile Include="JsonSerializer.cs" />
     <Compile Include="Models\QuotationInfo.cs" />
     <Compile Include="Models\StockInfo.cs" />
+    <Compile Include="MQPublisher\MQConnConfig.cs" />
+    <Compile Include="MQPublisher\MQConsumer.cs" />
+    <Compile Include="MQPublisher\MQMsgType.cs" />
+    <Compile Include="MQPublisher\MQProducer.cs" />
     <Compile Include="MQPublisher\QuotationMQPublisher.cs" />
     <Compile Include="Plugin\Plugin.cs" />
     <Compile Include="Plugin\PluginContext.cs" />
@@ -74,15 +90,17 @@
     <Compile Include="QuotationProvider\NegotiationParamsProvider.cs" />
     <Compile Include="QuotationProvider\SecurityCloseMDProvider.cs" />
     <Compile Include="QuotationProvider\SecurityInfoProvider.cs" />
-    <Compile Include="QuotationProvider\StaticInfoProvider.cs" />
+    <Compile Include="QuotationProvider\StaticInfoProviderBase.cs" />
+    <Compile Include="QuotationSnapService.cs" />
     <Compile Include="Repository\QuotationDataType.cs" />
     <Compile Include="Repository\QuotationPublisher.cs" />
     <Compile Include="Repository\QuotationRepository.cs" />
     <Compile Include="Repository\QuotationSource.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MDS.Plugin.Stock.xml">
+    <Content Include="MDS.Plugin.SZQuotV5.xml">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

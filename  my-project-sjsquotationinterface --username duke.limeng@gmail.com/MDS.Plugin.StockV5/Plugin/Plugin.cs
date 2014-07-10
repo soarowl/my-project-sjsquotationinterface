@@ -7,19 +7,19 @@ using Log4cb;
 using ServiceManager.Services;
 
 
-namespace MDS.Plugin.StockV5
+namespace MDS.Plugin.SZQuotV5
 {
-	[ServiceHost.PluginName("StockV5")]
+	[ServiceHost.PluginName("QuotV5")]
     public class Plugin : IPlugin
     {
         
-        private static MDS.Plugin.StockV5.QuotationCenter  quotCenter;
+        private static MDS.Plugin.SZQuotV5.QuotationCenter  quotCenter;
 
 
         /// <summary>
         /// 当前插件提供的应用服务名称
         /// </summary>
-        public static readonly string ServiceName = "CORE-SERVICES:MDSSTOCKV5";
+        public static readonly string ServiceName = "CORE-SERVICES:MDSQOUTV5";
         /// 主/备冗余服务对象
         /// 用于控制插件同一时间只能有一个实例在运行
         /// </summary>
@@ -73,14 +73,14 @@ namespace MDS.Plugin.StockV5
             {
                 Context.PluginInfo = cfg;
                 Context.LogHelper = logHelper;
-
+                PluginContext.Configuration = new Configuration(cfg.ConfigPath, cfg);
                 //创建一个主备冗余服务对象
                 MSService = DirectoryService.GetMasterSlaveService(ServiceName,false);
                 MSService.ModeChanged += new EventHandler(MSService_ModeChanged);
                 MSService.CheckStatus += new Func<MasterSlaveService, bool>(MSService_CheckStatus);
 
-
-                quotCenter = new MDS.Plugin.StockV5.QuotationCenter (Context.LogHelper);
+              
+                quotCenter = new MDS.Plugin.SZQuotV5.QuotationCenter (Context.LogHelper);
                 return true;
             }
             catch (Exception ex)
