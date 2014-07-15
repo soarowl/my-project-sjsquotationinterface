@@ -9,6 +9,9 @@ namespace MDS.Plugin.SZQuotV5
     {
          public static readonly ConcurrentDictionary<string, StockInfo> StockInfo = new ConcurrentDictionary<string, StockInfo>();
 
-         public static readonly ConcurrentDictionary<string, QuotationInfo> QuotationInfo = new ConcurrentDictionary<string, QuotationInfo>();
-    }
+         public static readonly ConcurrentDictionary<string, StockQuotation> StockQuotation = new ConcurrentDictionary<string, StockQuotation>();
+
+         public static readonly ConcurrentDictionary<string, FutureQuotation> FutureQuotation = new ConcurrentDictionary<string, FutureQuotation>();
+
+     }
 }

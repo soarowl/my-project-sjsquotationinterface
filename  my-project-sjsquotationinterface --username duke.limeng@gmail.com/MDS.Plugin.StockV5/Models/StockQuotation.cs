@@ -5,9 +5,9 @@ using System.Text;
 
 namespace MDS.Plugin.SZQuotV5
 {
-    public class QuotationInfo
+    public class StockQuotation
     {
-        public QuotationInfo() 
+        public StockQuotation() 
         {
             this.exchId = "1";
         }
@@ -190,9 +190,9 @@ namespace MDS.Plugin.SZQuotV5
         /// </summary>
         public Int64 sendTime{get;set;}
 
-        public QuotationInfo Clone()
+        public StockQuotation Clone()
         {
-            return MemberwiseClone() as QuotationInfo;
+            return MemberwiseClone() as StockQuotation;
         }
     }
 

@@ -419,7 +419,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N13(4)
         /// </remarks>
-        public double SettlePrice { get; set; }
+        public double ClearingPrice { get; set; }
 
 
         /// <summary>
@@ -472,7 +472,7 @@ namespace QuotV5.StaticInfo
         /// C=Call
         /// P=Put
         /// </remarks>
-        public CallOrPut CallOrPut { get; set; }
+        public string CallOrPut { get; set; }
 
         /// <summary>
         /// 交割月份
@@ -505,7 +505,7 @@ namespace QuotV5.StaticInfo
         ///<remarks>
         ///N13(4)
         /// </remarks>
-        public double ExercisePrice { get; set; }
+        public decimal ExercisePrice { get; set; }
 
         /// <summary>
         /// 最后交易日
@@ -545,7 +545,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N13(4)
         /// </remarks>
-        public double PrevSettlePrice { get; set; }
+        public decimal PrevClearingPrice { get; set; }
 
         /// <summary>
         /// 合约持仓量

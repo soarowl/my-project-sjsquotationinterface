@@ -71,7 +71,9 @@
     <Compile Include="DataSnaps\RawStaticInfoSnap.cs" />
     <Compile Include="DataSnaps\ProcessedDataSnap.cs" />
     <Compile Include="JsonSerializer.cs" />
-    <Compile Include="Models\QuotationInfo.cs" />
+    <Compile Include="Models\Date.cs" />
+    <Compile Include="Models\FutureQuotation.cs" />
+    <Compile Include="Models\StockQuotation.cs" />
     <Compile Include="Models\StockInfo.cs" />
     <Compile Include="MQPublisher\MQConnConfig.cs" />
     <Compile Include="MQPublisher\MQConsumer.cs" />

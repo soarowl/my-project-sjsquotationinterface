@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{67939BAB-471
 	ProjectSection(SolutionItems) = preProject
 		Doc\ActiveMQ.txt = Doc\ActiveMQ.txt
 		Doc\vpn连接.txt = Doc\vpn连接.txt
+		Doc\副本深圳证券交易所第五代交易接口行情改造_数据.xlsx = Doc\副本深圳证券交易所第五代交易接口行情改造_数据.xlsx
 		Doc\深圳证券交易所Binary行情数据接口规范1.00β-修订版.pdf = Doc\深圳证券交易所Binary行情数据接口规范1.00β-修订版.pdf
 		Doc\深圳证券交易所数据文件交换接口规范1.00β-修订版.pdf = Doc\深圳证券交易所数据文件交换接口规范1.00β-修订版.pdf
 		Doc\深圳证券交易所第五代交易接口行情改造.docx = Doc\深圳证券交易所第五代交易接口行情改造.docx

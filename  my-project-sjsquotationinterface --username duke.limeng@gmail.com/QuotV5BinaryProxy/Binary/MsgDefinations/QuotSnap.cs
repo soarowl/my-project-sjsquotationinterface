@@ -203,6 +203,7 @@ namespace QuotV5.Binary
             public const string X9 = "x9";
             public const string MaxOrderPrice = "xe";
             public const string MinOrderPrice = "xf";
+            public const string OpenPosition = "xg";
         }
         #endregion
 
@@ -254,6 +255,9 @@ namespace QuotV5.Binary
             }
             return rtn;
         }
+
+
+      
     }
 
 
@@ -449,7 +453,17 @@ namespace QuotV5.Binary
     /// </summary>
     public class QuotSnap300111 : QuotSnapBase<QuotSnapExtInfo300111, QuotSnap300111>
     {
+        public class MDStreamID
+        {
+            public const string Stock = "010";
 
+            public const string Repo = "020";
+
+            public const string Bond = "030";
+
+            public const string Option = "040";
+
+        }
     }
 
     /// <summary>

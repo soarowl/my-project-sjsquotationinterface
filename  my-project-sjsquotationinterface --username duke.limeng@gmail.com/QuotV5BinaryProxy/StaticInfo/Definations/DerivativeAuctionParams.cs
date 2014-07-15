@@ -65,7 +65,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N13(4)
         /// </remarks>
-        public double RisePrice { get; set; }
+        public decimal RisePrice { get; set; }
 
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N13(4)
         /// </remarks>
-        public double FallPrice { get; set; }
+        public decimal FallPrice { get; set; }
 
         /// <summary>
         /// 昨卖开每张保证金

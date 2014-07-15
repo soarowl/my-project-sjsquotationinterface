@@ -156,4 +156,28 @@ namespace MDS.Plugin.SZQuotV5
         }
     }
 
+    /// <summary>
+    /// 期货行情源
+    /// </summary>
+    [DebuggerNonUserCode]
+    public sealed class FutureQuotationSource : QuotationSource
+    {
+        /// <summary>
+        /// FFuture行情
+        /// </summary>
+        public static readonly FutureQuotationSource FFuture = new FutureQuotationSource(QuotServiceNames.FFuture);
+
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        FutureQuotationSource(string source)
+            : base(source)
+        {
+        }
+
+    }
+
+
 }

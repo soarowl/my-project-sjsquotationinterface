@@ -41,7 +41,7 @@ namespace MDS.Plugin.SZQuotV5
             if (properties != null && properties.ContainsKey("clientId"))
             {
                 this.logHelper.LogInfoMsg("收到SZ5_REQ_Quotation请求，clientId={0}", properties["clientId"]);
-                PublishQuotSnap(properties["clientId"] as string);
+                PublishStockQuotSnap(properties["clientId"] as string);
             }
         }
 
@@ -60,7 +60,7 @@ namespace MDS.Plugin.SZQuotV5
             try
             {
                 var stockInfos = ProcessedDataSnap.StockInfo.Values.ToList();
-                this.quotPublisher.Enqueue(stockInfos, clientId);
+                this.quotPublisher.Enqueue(stockInfos,false, clientId);
             }
             catch (Exception ex)
             {
@@ -68,11 +68,11 @@ namespace MDS.Plugin.SZQuotV5
             }
         }
 
-        private void PublishQuotSnap(string clientId)
+        private void PublishStockQuotSnap(string clientId)
         {
             try
             {
-                var quotInfos = ProcessedDataSnap.QuotationInfo.Values.ToList();
+                var quotInfos = ProcessedDataSnap.StockQuotation.Values.ToList();
                 this.quotPublisher.Enqueue(quotInfos, false, clientId);
             }
             catch (Exception ex)
@@ -80,6 +80,20 @@ namespace MDS.Plugin.SZQuotV5
                 this.logHelper.LogErrMsg(ex, "发布QuotationInfo快照 clientId={0}", clientId);
             }
         }
+
+        private void PublishFutureQuotSnap(string clientId)
+        {
+            try
+            {
+                var quotInfos = ProcessedDataSnap.StockQuotation.Values.ToList();
+                this.quotPublisher.Enqueue(quotInfos, false, clientId);
+            }
+            catch (Exception ex)
+            {
+                this.logHelper.LogErrMsg(ex, "发布QuotationInfo快照 clientId={0}", clientId);
+            }
+        }
+
 
         public void Stop()
         {

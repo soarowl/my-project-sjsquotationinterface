@@ -24,7 +24,7 @@ namespace QuotV5.StaticInfo
         /// <summary>
         /// 收盘价
         /// </summary>
-        public double ClosePx { get; set; }
+        public decimal ClosePx { get; set; }
 
         /// <summary>
         /// 总成交量

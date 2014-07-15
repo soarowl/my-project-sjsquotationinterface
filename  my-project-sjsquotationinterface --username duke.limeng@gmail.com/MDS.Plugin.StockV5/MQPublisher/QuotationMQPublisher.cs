@@ -25,20 +25,36 @@ namespace MDS.Plugin.SZQuotV5
             this.mqProducer.StartMQ();
         }
 
-        //public void Enqueue(StockInfo stockInfo, bool isRealtimeQuotation, string clientId = null)
-        //{
-        //    var msg = new Msg() { ClientId = clientId, Data = stockInfo };
-        //    if (isRealtimeQuotation)
-        //        msg.MsgType = MQMsgType.TOPIC;
-        //    else
-        //        msg.MsgType = MQMsgType.QUEUE;
-        //    msgQueue.Enqueue(msg);
-        //    this.newDataEvent.Set();
-        //}
-
-        public void Enqueue(QuotationInfo quotInfo, bool isRealtimeQuotation, string clientId = null)
+        public void Enqueue(IEnumerable<StockInfo> stockInfos, bool isRealtimeQuotation, string clientId = null)
         {
-            var msg = new Msg() { ClientId = clientId, Data = quotInfo };
+            EnqueueData(stockInfos.ToList(), isRealtimeQuotation, clientId);
+        }
+
+        public void Enqueue(StockQuotation quotInfo, bool isRealtimeQuotation, string clientId = null)
+        {
+            EnqueueData(quotInfo, isRealtimeQuotation, clientId);
+        }
+
+        public void Enqueue(IEnumerable<StockQuotation> quotInfos, bool isRealtimeQuotation, string clientId = null)
+        {
+            EnqueueData(quotInfos.ToList(), isRealtimeQuotation, clientId);
+        }
+
+        public void Enqueue(FutureQuotation quotInfo, bool isRealtimeQuotation, string clientId = null)
+        {
+            EnqueueData(quotInfo, isRealtimeQuotation, clientId);
+        }
+
+        public void Enqueue(IEnumerable<FutureQuotation> futureInfos, bool isRealtimeQuotation, string clientId = null)
+        {
+            EnqueueData(futureInfos.ToList(), isRealtimeQuotation, clientId);
+        }
+
+        private void EnqueueData(object marketData, bool isRealtimeQuotation, string clientId = null)
+        {
+            if (marketData == null)
+                return;
+            var msg = new Msg() { ClientId = clientId, Data = marketData };
             if (isRealtimeQuotation)
             {
                 msg.MsgType = MQMsgType.TOPIC;
@@ -51,34 +67,8 @@ namespace MDS.Plugin.SZQuotV5
             }
             msgQueue.Enqueue(msg);
             this.newDataEvent.Set();
+        
         }
-
-        public void Enqueue(IEnumerable<StockInfo> stockInfos, string clientId = null)
-        {
-            var msg = new Msg() { ClientId = clientId, Data = stockInfos };
-            msg.MsgType = MQMsgType.QUEUE;
-            msg.Topic = "SZ5_StkInfo_Image";
-            msgQueue.Enqueue(msg);
-            this.newDataEvent.Set();
-        }
-
-        public void Enqueue(IEnumerable<QuotationInfo> quotInfos, bool isRealtimeQuotation, string clientId = null)
-        {
-            var msg = new Msg() { ClientId = clientId, Data = quotInfos.ToList() };
-            if (isRealtimeQuotation)
-            {
-                msg.MsgType = MQMsgType.TOPIC;
-                msg.Topic = "SZ5_Quotation_RealTime";
-            }
-            else
-            {
-                msg.MsgType = MQMsgType.QUEUE;
-                msg.Topic = "SZ5_Quotation_Image";
-            }
-            msgQueue.Enqueue(msg);
-            this.newDataEvent.Set();
-        }
-
 
         public void Dispose()
         {
@@ -116,28 +106,37 @@ namespace MDS.Plugin.SZQuotV5
             if (this.msgQueue.TryDequeue(out msg))
             {
                 if (msg.Data is List<StockInfo>)
-                    Publish<StockInfo>(msg.Data as List<StockInfo>, msg.ClientId, msg.MsgType, msg.Topic);
-                else if (msg.Data is List<QuotationInfo>)
-                    Publish<QuotationInfo>(msg.Data as List<QuotationInfo>, msg.ClientId, msg.MsgType, msg.Topic);
+                    Publish<StockInfo>(msg.Data as List<StockInfo>, msg.ClientId, msg.MsgType, msg.Topic,"STK");
+                else if (msg.Data is List<StockQuotation>)
+                    Publish<StockQuotation>(msg.Data as List<StockQuotation>, msg.ClientId, msg.MsgType, msg.Topic, "STK");
                 else if (msg.Data is StockInfo)
                 {
                     List<StockInfo> stockList = new List<StockInfo>() { msg.Data as StockInfo };
-                    Publish<StockInfo>(stockList, msg.ClientId, msg.MsgType, msg.Topic);
+                    Publish<StockInfo>(stockList, msg.ClientId, msg.MsgType, msg.Topic, "STK");
                 }
-                else if (msg.Data is QuotationInfo)
+                else if (msg.Data is StockQuotation)
                 {
-                    List<QuotationInfo> quotList = new List<QuotationInfo>() { msg.Data as QuotationInfo };
-                    Publish<QuotationInfo>(quotList, msg.ClientId, msg.MsgType, msg.Topic);
+                    List<StockQuotation> quotList = new List<StockQuotation>() { msg.Data as StockQuotation };
+                    Publish<StockQuotation>(quotList, msg.ClientId, msg.MsgType, msg.Topic, "STK");
+                }
+                else if (msg.Data is FutureQuotation)
+                {
+                    List<FutureQuotation> quotList = new List<FutureQuotation>() { msg.Data as FutureQuotation };
+                    Publish<FutureQuotation>(quotList, msg.ClientId, msg.MsgType, msg.Topic, "FUT");
+                }
+                else if (msg.Data is List<FutureQuotation>)
+                {
+                    Publish<FutureQuotation>(msg.Data as List<FutureQuotation>, msg.ClientId, msg.MsgType, msg.Topic, "FUT");
                 }
             }
         }
 
-        private void Publish<T>(List<T> data, string clientId, MQMsgType msgType, string topic, bool sendFinishMsg = false)
+        private void Publish<T>(List<T> data, string clientId, MQMsgType msgType, string topic,string refreshType, bool sendFinishMsg = false)
         {
             if (data == null || data.Count == 0)
                 return;
             Dictionary<string, object> properties = new Dictionary<string, object>();
-            properties["refreshType"] = "STK";
+            properties["refreshType"] = refreshType;
             if (!string.IsNullOrEmpty(clientId))
             {
                 properties["clientId"] = clientId;
@@ -164,8 +163,6 @@ namespace MDS.Plugin.SZQuotV5
             this.logHelper.LogInfoMsg("向MQ发送数据结束消息，MsgId={0},数据类型={1},Succeed={2}", msgId, typeof(T).Name, s);
 
         }
-
-
 
         class Msg
         {

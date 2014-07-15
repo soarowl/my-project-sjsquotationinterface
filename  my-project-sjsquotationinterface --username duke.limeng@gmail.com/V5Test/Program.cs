@@ -98,11 +98,11 @@ namespace V5Test
             consumer2.SubscribeMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_Quotation", null);
         }
 
-        static List<MDS.Plugin.SZQuotV5.QuotationInfo> qoutList;
+        static List<MDS.Plugin.SZQuotV5.StockQuotation> qoutList;
         static List<MDS.Plugin.SZQuotV5.StockInfo> stockList;
         static void consumer2_OnMessageReceived(string arg1, Dictionary<string, object> arg2)
         {
-            qoutList = MDS.Plugin.SZQuotV5.JsonSerializer.StringToObject<List<MDS.Plugin.SZQuotV5.QuotationInfo>>(arg1);
+            qoutList = MDS.Plugin.SZQuotV5.JsonSerializer.StringToObject<List<MDS.Plugin.SZQuotV5.StockQuotation>>(arg1);
             Console.WriteLine("SZ5_Quotation_Image Count={0},clientID={1}", qoutList.Count, arg2["clientId"]);
         }
 
@@ -292,20 +292,20 @@ namespace V5Test
             };
             QuotV5.Binary.RealTimeQuotConnection conn = new QuotV5.Binary.RealTimeQuotConnection(cfg, logHelper);
 
-            conn.OnMarketDataReceived += new Action<QuotV5.Binary.IMarketData>(conn_OnMarketDataReceived);
+            conn.OnMarketDataReceived += new Action<QuotV5.Binary.MarketDataEx>(conn_OnMarketDataReceived);
             conn.Start();
         }
 
-        static void conn_OnMarketDataReceived(QuotV5.Binary.IMarketData obj)
+        static void conn_OnMarketDataReceived(QuotV5.Binary.MarketDataEx obj)
         {
-            if (obj is QuotV5.Binary.Order300192)
-            {
-                logHelper.LogInfoMsg("收到Order300192");
-            }
-            else if (obj is QuotV5.Binary.QuotSnap300111)
-            {
-                logHelper.LogInfoMsg("收到QuotSnap300111");
-            }
+            //if (obj is QuotV5.Binary.Order300192)
+            //{
+            //    logHelper.LogInfoMsg("收到Order300192");
+            //}
+            //else if (obj is QuotV5.Binary.QuotSnap300111)
+            //{
+            //    logHelper.LogInfoMsg("收到QuotSnap300111");
+            //}
 
         }
 

@@ -584,19 +584,24 @@ namespace QuotV5.Binary
 
     public class RealTimeQuotConnection : ConnectionBase
     {
-        public event Action<IMarketData> OnMarketDataReceived;
+        public event Action<MarketDataEx> OnMarketDataReceived;
 
-        private ConcurrentQueue<MessagePack> messageQueue = new ConcurrentQueue<MessagePack>();
+        private ConcurrentQueue<MessagePackEx> messageQueue = new ConcurrentQueue<MessagePackEx>();
+
+        /// <summary>
+        /// 接收行情数据的线程
+        /// </summary>
+        protected Thread marketDataReceiveThread;
+
+  
+
         public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
             : base(config, logHelper)
         {
 
         }
 
-        /// <summary>
-        /// 接收行情数据的线程
-        /// </summary>
-        protected Thread marketDataReceiveThread;
+
 
 
         /// <summary>
@@ -643,12 +648,19 @@ namespace QuotV5.Binary
                     break;
                 var msg = ReceiveMessage();
                 if (msg != null)
+                   // EnqueueMessage(msg);
                     ProcessMessage(msg);
             }
 
-            this.marketDataReceiveThreadStarted = false;
             this.logHelper.LogInfoMsg("MarketDataReceiveThread线程退出");
             this.receiveThreadExitEvent.Set();
+            this.marketDataReceiveThreadStarted = false;
+        }
+
+
+        private void EnqueueMessage(MessagePack msg)
+        {
+            this.messageQueue.Enqueue(new MessagePackEx(msg, DateTime.Now));
         }
 
         /// <summary>
@@ -658,6 +670,7 @@ namespace QuotV5.Binary
         /// TODO:考虑把收到的数据包加入队列异步处理
         private void ProcessMessage(MessagePack msg)
         {
+            DateTime now = DateTime.Now;
             IMarketData marketData = null;
             if (msg.Header.Type == (uint)MsgType.ChannelHeartbeat)
             {
@@ -682,7 +695,7 @@ namespace QuotV5.Binary
             if (marketData != null)
             {
                 logMarketData(marketData);
-                RaiseEvent(marketData);
+                RaiseEvent(marketData,now);
             }
 
         }
@@ -695,11 +708,11 @@ namespace QuotV5.Binary
             logHelper.LogDebugMsg("收到数据：\r\n{0}", str);
         }
 
-        private void RaiseEvent(IMarketData marketData)
+        private void RaiseEvent(IMarketData marketData,DateTime receiveTime)
         {
             var handler = this.OnMarketDataReceived;
             if (handler != null)
-                handler(marketData);
+                handler(new MarketDataEx(marketData,receiveTime));
         }
     }
 
@@ -728,5 +741,22 @@ namespace QuotV5.Binary
         public int ConnectionTimeoutMS { get; set; }
         public int ReconnectIntervalMS { get; set; }
         public int HeartbeatIntervalS { get; set; }
+    }
+
+    public class MessagePackEx : Tuple<MessagePack, DateTime>
+    {
+        public MessagePackEx(MessagePack messagePack, DateTime receiveTime) : base(messagePack, receiveTime) { }
+
+        public MessagePack MessagePack { get { return this.Item1; } }
+
+        public DateTime ReceiveTime { get { return this.Item2; } }
+    }
+    public class MarketDataEx : Tuple<IMarketData, DateTime>
+    {
+        public MarketDataEx(IMarketData marketData, DateTime receiveTime):base(marketData,receiveTime)
+        { }
+
+        public IMarketData MarketData { get { return this.Item1; } }
+        public DateTime ReceiveTime { get { return this.Item2; } }
     }
 }

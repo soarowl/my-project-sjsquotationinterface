@@ -8,7 +8,8 @@ namespace MDS.Plugin.SZQuotV5
 {
     public class QuotationRepository
     {
-        static QuotationSource quotSource = StockQuotationSource.Level1;
+        static QuotationSource stockQuotSource = StockQuotationSource.Level1;
+        static QuotationSource futureQuotSource = FutureQuotationSource.FFuture;
 
         public List<StockInfo> GetAllStockInfo()
         {
@@ -17,7 +18,7 @@ namespace MDS.Plugin.SZQuotV5
                 if (conn == null)
                     return null;
 
-                string key = string.Format("{0}:{1}", quotSource.ToFormatString(), QuotationDataType.StockInfo.ToFormatString());
+                string key = string.Format("{0}:{1}", stockQuotSource.ToFormatString(), QuotationDataType.StockInfo.ToFormatString());
 
 
                 var rtnBytes = (conn as RedisClient).HVals(key);
@@ -36,23 +37,23 @@ namespace MDS.Plugin.SZQuotV5
             }
         }
 
-        public List<QuotationInfo> GetAllQuotationInfo()
+        public List<StockQuotation> GetAllStockQuotation()
         {
             using (var conn = QuotationPublisher.Publisher.GetNeedDisposedConnection())
             {
                 if (conn == null)
                     return null;
 
-                string key = string.Format("{0}:{1}", quotSource.ToFormatString(), QuotationDataType.Quotation.ToFormatString());
+                string key = string.Format("{0}:{1}", stockQuotSource.ToFormatString(), QuotationDataType.Quotation.ToFormatString());
 
                 var rtnBytes = (conn as RedisClient).HVals(key);
                 if (rtnBytes == null)
                     return null;
 
-                List<QuotationInfo> rtn = new List<QuotationInfo>();
+                List<StockQuotation> rtn = new List<StockQuotation>();
                 foreach (var rtnByte in rtnBytes)
                 {
-                    QuotationInfo quotInfo = JsonSerializer.BytesToObject<QuotationInfo>(rtnByte);
+                    StockQuotation quotInfo = JsonSerializer.BytesToObject<StockQuotation>(rtnByte);
                     rtn.Add(quotInfo);
                 }
                 return rtn;
@@ -60,33 +61,56 @@ namespace MDS.Plugin.SZQuotV5
             }
         }
 
+        public List<FutureQuotation> GetAllFutureQuotation()
+        {
+            using (var conn = QuotationPublisher.Publisher.GetNeedDisposedConnection())
+            {
+                if (conn == null)
+                    return null;
+
+                string key = string.Format("{0}:{1}", futureQuotSource.ToFormatString(), QuotationDataType.Quotation.ToFormatString());
+
+                var rtnBytes = (conn as RedisClient).HVals(key);
+                if (rtnBytes == null)
+                    return null;
+
+                List<FutureQuotation> rtn = new List<FutureQuotation>();
+                foreach (var rtnByte in rtnBytes)
+                {
+                    FutureQuotation quotInfo = JsonSerializer.BytesToObject<FutureQuotation>(rtnByte);
+                    rtn.Add(quotInfo);
+                }
+                return rtn;
+
+            }
+        }
+
+
         public void UpdateBasicInfo(StockInfo stockInfo)
         {
             byte[] stockInfoBytes = JsonSerializer.ObjectToBytes<StockInfo>(stockInfo);
             string stkId = stockInfo.stkId;
-            string key = string.Format("{0}:{1}", quotSource.ToFormatString(), QuotationDataType.StockInfo.ToFormatString());
+            string key = string.Format("{0}:{1}", stockQuotSource.ToFormatString(), QuotationDataType.StockInfo.ToFormatString());
             QuotationPublisher.Publisher.Update(key, stkId, stockInfoBytes);
         }
 
-        public void UpdateQuotInfo(QuotationInfo quotInfo)
+        public void UpdateStockQuotation(StockQuotation quotInfo)
         {
-            byte[] quotInfoBytes = JsonSerializer.ObjectToBytes<QuotationInfo>(quotInfo);
+            byte[] quotInfoBytes = JsonSerializer.ObjectToBytes<StockQuotation>(quotInfo);
             string stkId = quotInfo.stkId;
-            string key = string.Format("{0}:{1}", quotSource.ToFormatString(), QuotationDataType.Quotation.ToFormatString());
+            string key = string.Format("{0}:{1}", stockQuotSource.ToFormatString(), QuotationDataType.Quotation.ToFormatString());
             QuotationPublisher.Publisher.Update(key, stkId, quotInfoBytes);
 
         }
 
-        public void ClearAllBasicInfo()
+        public void UpdateFutureQuotation(FutureQuotation quotInfo)
         {
-
+            byte[] quotInfoBytes = JsonSerializer.ObjectToBytes<FutureQuotation>(quotInfo);
+            string stkId = quotInfo.stkId;
+            string key = string.Format("{0}:{1}", futureQuotSource.ToFormatString(), QuotationDataType.Quotation.ToFormatString());
+            QuotationPublisher.Publisher.Update(key, stkId, quotInfoBytes);
         }
-
-        public void ClearAllQuotInfo()
-        {
-
-        }
-
+      
      
     }
 }
