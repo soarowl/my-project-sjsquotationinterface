@@ -677,6 +677,11 @@ namespace QuotV5.Binary
                 ChannelHeartbeat heartbeat = ChannelHeartbeat.Deserialize(msg.BodyData);
                 logMarketData<ChannelHeartbeat>(heartbeat);
             }
+            else if (msg.Header.Type == (uint)MsgType.RealtimeStatus)
+            {
+                marketData = RealtimeStatus.Deserialize(msg.BodyData);
+                logMarketData<RealtimeStatus>(marketData as RealtimeStatus);
+            }
             else if (msg.Header.Type == (uint)MsgType.QuotationSnap)
             {
                 marketData = QuotSnap300111.Deserialize(msg.BodyData);

@@ -205,7 +205,7 @@ namespace MDS.Plugin.SZQuotV5
         /// <summary>
         /// 做市商标志
         /// </summary>
-        public bool marketMarkerFlag{get;set;}
+        public bool marketMakerFlag{get;set;}
 
         /// <summary>
         /// 交易类型

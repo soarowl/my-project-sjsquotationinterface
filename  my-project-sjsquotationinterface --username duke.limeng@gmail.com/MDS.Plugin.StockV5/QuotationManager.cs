@@ -10,7 +10,7 @@ namespace MDS.Plugin.SZQuotV5
     {
         private Status currentStatus = Status.Stopped;
         private Log4cb.ILog4cbHelper logHelper;
-        private QuotV5.Binary.RealTimeQuotConnection quotConn;
+        private QuotV5.Binary.RealTimeQuotConnection[] quotConnections;
         private QuotationRepository quotRepository;
         private QuotationMQPublisher quotPublisher;
 
@@ -24,7 +24,7 @@ namespace MDS.Plugin.SZQuotV5
         private object syncUpdateStaticInfoSnap = new object();
         private object syncRunningStatus = new object();
         public QuotationManager(
-            QuotV5.Binary.RealTimeQuotConnection quotConn,
+            QuotV5.Binary.RealTimeQuotConnection[] quotConnections,
             QuotationRepository quotRepository,
             QuotationMQPublisher quotPublisher,
             SecurityInfoProvider securityInfoProvider,
@@ -36,7 +36,7 @@ namespace MDS.Plugin.SZQuotV5
             Log4cb.ILog4cbHelper logHelper
             )
         {
-            this.quotConn = quotConn;
+            this.quotConnections = quotConnections;
             this.quotRepository = quotRepository;
             this.quotPublisher = quotPublisher;
             this.securityInfoProvider = securityInfoProvider;
@@ -47,7 +47,8 @@ namespace MDS.Plugin.SZQuotV5
             this.securityCloseMDProvider = securityCloseMDProvider;
             this.logHelper = logHelper;
 
-            this.quotConn.OnMarketDataReceived += new Action<QuotV5.Binary.MarketDataEx>(QuotConn_OnMarketDataReceived);
+            foreach (var conn in this.quotConnections)
+                conn.OnMarketDataReceived += new Action<QuotV5.Binary.MarketDataEx>(QuotConn_OnMarketDataReceived);
             this.securityInfoProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.SecurityInfoBase>>(SecurityInfoProvider_OnStaticInfoRead);
             this.indexInfoProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.IndexInfo>>(IndexInfoProvider_OnStaticInfoRead);
             this.cashAuctionParamsProvider.OnStaticInfoRead += new Action<List<QuotV5.StaticInfo.CashAuctionParams>>(CashAuctionParamsProvider_OnStaticInfoRead);
@@ -67,7 +68,8 @@ namespace MDS.Plugin.SZQuotV5
                 RawStaticInfoSnap.ClearAll();
                 TryLoadStoredDataSnap();
 
-                this.quotConn.Start();
+                foreach (var conn in this.quotConnections)
+                    conn.Start();
                 this.securityInfoProvider.Start();
                 this.indexInfoProvider.Start();
                 this.cashAuctionParamsProvider.Start();
@@ -85,7 +87,8 @@ namespace MDS.Plugin.SZQuotV5
                 if (this.currentStatus == Status.Stopped)
                     return;
                 this.currentStatus = Status.Stopping;
-                this.quotConn.Stop();
+                foreach (var conn in this.quotConnections)
+                    conn.Stop();
                 this.securityInfoProvider.Stop();
                 this.indexInfoProvider.Stop();
                 this.cashAuctionParamsProvider.Stop();
@@ -468,7 +471,7 @@ namespace MDS.Plugin.SZQuotV5
             stockInfo.buyQtyUpperLimit = (int)cashAuctionParams.BuyQtyUpperLimit;
             stockInfo.sellQtyUpperLimit = (int)cashAuctionParams.SellQtyUpperLimit;
             stockInfo.orderPriceUnit = cashAuctionParams.PriceTick;
-            stockInfo.marketMarkerFlag = cashAuctionParams.MarketMakerFlag;
+            stockInfo.marketMakerFlag = cashAuctionParams.MarketMakerFlag;
         }
 
 
@@ -521,6 +524,10 @@ namespace MDS.Plugin.SZQuotV5
                 if (ProcessedDataSnap.FutureQuotation.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
                 {
                     newQuotInfo = preQuotInfo.Clone();
+                    QuotV5.StaticInfo.SecurityInfoBase securityInfo = null;
+                    if (RawStaticInfoSnap.SecurityInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out securityInfo))
+                        SetFutureQuotationProperty(newQuotInfo, securityInfo as QuotV5.StaticInfo.OptionSecuirtyInfo);
+
                     SetFutureQuotationProperty(newQuotInfo, quotSnap);
                 }
                 else
@@ -554,6 +561,10 @@ namespace MDS.Plugin.SZQuotV5
                 if (ProcessedDataSnap.StockQuotation.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
                 {
                     newQuotInfo = preQuotInfo.Clone();
+                    QuotV5.StaticInfo.SecurityInfoBase securityInfo = null;
+                    if (RawStaticInfoSnap.SecurityInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out securityInfo))
+                        SetStockQuotationProperty(newQuotInfo, securityInfo);
+
                     SetStockQuotationProperty(newQuotInfo, quotSnap);
                 }
                 else
@@ -589,6 +600,9 @@ namespace MDS.Plugin.SZQuotV5
             if (ProcessedDataSnap.StockQuotation.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
             {
                 newQuotInfo = preQuotInfo.Clone();
+                QuotV5.StaticInfo.SecurityInfoBase securityInfo = null;
+                if (RawStaticInfoSnap.SecurityInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out securityInfo))
+                    SetStockQuotationProperty(newQuotInfo, securityInfo);
                 SetStockQuotationProperty(newQuotInfo, quotSnap);
             }
             else
@@ -626,6 +640,9 @@ namespace MDS.Plugin.SZQuotV5
             if (ProcessedDataSnap.StockQuotation.TryGetValue(quotSnap.CommonInfo.SecurityID, out preQuotInfo))
             {
                 newQuotInfo = preQuotInfo.Clone();
+                QuotV5.StaticInfo.IndexInfo securityInfo = null;
+                if (RawStaticInfoSnap.IndexInfo.TryGetValue(quotSnap.CommonInfo.SecurityID, out securityInfo))
+                    SetStockQuotationProperty(newQuotInfo, securityInfo);
                 SetStockQuotationProperty(newQuotInfo, quotSnap);
             }
             else
@@ -997,12 +1014,12 @@ namespace MDS.Plugin.SZQuotV5
             quotInfo.orderPriceUnit = derivativeAuctionParams.PriceTick;
             quotInfo.maxOrderPrice = derivativeAuctionParams.RisePrice;
             quotInfo.minOrderPrice = derivativeAuctionParams.FallPrice;
-            quotInfo.marketMarkerFlag = derivativeAuctionParams.MarketMakerFlag;
+            quotInfo.marketMakerFlag = derivativeAuctionParams.MarketMakerFlag;
             quotInfo.currMargin = derivativeAuctionParams.SellMargin;
             quotInfo.minBuyQtyTimes = (int)derivativeAuctionParams.BuyQtyUnit;
             quotInfo.minSellQtyTimes = (int)derivativeAuctionParams.SellQtyUnit;
             quotInfo.preCurrMargin = derivativeAuctionParams.LastSellMargin;
-            quotInfo.marketMarkerFlag = derivativeAuctionParams.MarketMakerFlag;
+            quotInfo.marketMakerFlag = derivativeAuctionParams.MarketMakerFlag;
         }
 
 
@@ -1189,6 +1206,8 @@ namespace MDS.Plugin.SZQuotV5
             Started,
             Startting
         }
+
+       
     }
 
 

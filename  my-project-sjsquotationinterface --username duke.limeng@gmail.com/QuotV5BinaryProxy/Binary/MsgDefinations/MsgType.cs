@@ -24,6 +24,10 @@ namespace QuotV5.Binary
         /// </summary>
         ChannelHeartbeat=390095,
         /// <summary>
+        /// 证券实时状态
+        /// </summary>
+        RealtimeStatus=390013,
+        /// <summary>
         /// 公告
         /// </summary>
         Bullet=390012,

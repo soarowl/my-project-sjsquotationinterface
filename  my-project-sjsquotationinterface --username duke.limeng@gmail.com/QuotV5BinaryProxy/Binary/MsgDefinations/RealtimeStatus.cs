@@ -52,7 +52,7 @@ namespace QuotV5.Binary
 
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct RealtimeStatusWithoutSwitches
+    public struct RealtimeStatusWithoutSwitches : IMessage
     {
         public StandardHeader Header;
 
@@ -71,6 +71,11 @@ namespace QuotV5.Binary
 
         public UInt32 NoSwitch;
 
+
+        public MsgType MsgType
+        {
+            get { return Binary.MsgType.RealtimeStatus; }
+        }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SecuritySwitch

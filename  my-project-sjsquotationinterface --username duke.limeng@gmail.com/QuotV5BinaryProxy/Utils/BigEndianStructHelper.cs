@@ -107,7 +107,7 @@ namespace QuotV5
         }
         private static void GenerateCode_StructToBytes(StringBuilder sb, Type type)
         {
-            sb.AppendLine(string.Format("public static byte[] StructToBytes({0} obj,System.Text.Encoding encoding)", type.FullName.Replace("+", ".")));
+            sb.AppendLine(string.Format("public static byte[] StructToBytes(global::{0} obj,System.Text.Encoding encoding)", type.FullName.Replace("+", ".")));
             sb.AppendLine("{");//method start
 
 
@@ -183,7 +183,7 @@ namespace QuotV5
         private static void GenerateCode_BytesToStruct(StringBuilder sb, Type type)
         {
 
-            sb.AppendLine(string.Format("public static {0} BytesToStruct(byte[] bytes,System.Text.Encoding encoding)", type.FullName.Replace("+", ".")));
+            sb.AppendLine(string.Format("public static global::{0} BytesToStruct(byte[] bytes,System.Text.Encoding encoding)", type.FullName.Replace("+", ".")));
             sb.AppendLine("{");//method start
 
 
@@ -202,7 +202,7 @@ namespace QuotV5
                 if (fieldType == typeof(string))
                 {
                     MarshalAsAttribute attr = field.GetCustomAttributes(typeof(MarshalAsAttribute), false).First() as MarshalAsAttribute;
-                    sb.AppendLine(string.Format("rtn.{0}=encoding.GetString(bytes,{1},{2}).Trim('\\0');", field.Name, offset, attr.SizeConst));
+                    sb.AppendLine(string.Format("rtn.{0}=encoding.GetString(bytes,{1},{2}).Trim('\\0').Trim();", field.Name, offset, attr.SizeConst));
                 }
                 else if (
                     fieldType == typeof(Int16)

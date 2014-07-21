@@ -6,6 +6,7 @@ using Log4cb;
 using System.IO;
 using System.Linq.Expressions;
 using System.Threading;
+using ServiceManager.Services;
 namespace V5Test
 {
     class Program
@@ -13,11 +14,13 @@ namespace V5Test
         static Log4cb.ILog4cbHelper logHelper = new Log4cb.Log4cbHelper("V5");
         static void Main(string[] args)
         {
+            init();
+            getSnap();
             //testMQConsumer2();
            // Thread.Sleep(3000);
             // testMQProducer();
             //testObjToString();
-             testRealtimeQuotConn();
+            // testRealtimeQuotConn();
             // testStaticInfo_Index();
             // testStaticInfo_Security();
             //  testStaticInfo_CashAuctionParams();
@@ -44,6 +47,19 @@ namespace V5Test
             Console.Read();
         }
 
+        private static void init()
+        {
+            DirectoryService.Initialize();
+            DirectoryService.SetDirectoryServers("192.168.1.167:6618");
+
+
+          }
+     static   List<MDS.Plugin.SZQuotV5.StockQuotation> quot;
+        private static void getSnap()
+        {
+            MDS.Plugin.SZQuotV5.QuotationRepository re = new MDS.Plugin.SZQuotV5.QuotationRepository();
+          quot=  re.GetAllStockQuotation();
+        }
 
         private static void testMQProducer()
         {

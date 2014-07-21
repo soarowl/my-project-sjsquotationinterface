@@ -42,6 +42,14 @@
     <Reference Include="Log4cb">
       <HintPath>..\QuotV5BinaryProxy\Libs\Log4cb.dll</HintPath>
     </Reference>
+    <Reference Include="ServiceHost, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31987554334705a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceHost.dll</HintPath>
+    </Reference>
+    <Reference Include="ServiceManager, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31987554334705a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceManager.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceStack.Text">
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceStack.Text.dll</HintPath>
     </Reference>

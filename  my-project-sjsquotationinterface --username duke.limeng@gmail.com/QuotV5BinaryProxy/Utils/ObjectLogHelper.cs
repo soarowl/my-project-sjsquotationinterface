@@ -5,6 +5,7 @@ using System.Text;
 using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace QuotV5
 {
@@ -78,27 +79,14 @@ namespace QuotV5
 
         private static void GenerateCode_ObjectToStringClass(StringBuilder sb, Type type)
         {
+            Trace.WriteLine(string.Format("GenerateCode_ObjectToStringClass:{0}", type.FullName));
+            if (IsCommonType(type))
+                return;
+
             if (type.IsArray)
             {
                 Type elementType = type.GetElementType();
-                if (
-                    elementType == typeof(string)
-                   || elementType == typeof(Int16)
-                    || elementType == typeof(Int32)
-                    || elementType == typeof(Int64)
-                    || elementType == typeof(UInt16)
-                    || elementType == typeof(UInt32)
-                    || elementType == typeof(UInt64)
-                    || elementType == typeof(float)
-                    || elementType == typeof(Double)
-                    || elementType == typeof(Decimal)
-                    || elementType == typeof(Boolean)
-                    || elementType == typeof(Char)
-                    || elementType.IsEnum
-                    )
-                {
-                }
-                else
+                if (!IsCommonType(elementType))
                 {
                     GenerateCode_ObjectToStringClass(sb, elementType);
                 }
@@ -109,24 +97,7 @@ namespace QuotV5
                 if (type.Name == "List`1")
                 {
                     Type elementType = type.GetGenericArguments().First();
-                    if (
-                  elementType == typeof(string)
-                 || elementType == typeof(Int16)
-                  || elementType == typeof(Int32)
-                  || elementType == typeof(Int64)
-                  || elementType == typeof(UInt16)
-                  || elementType == typeof(UInt32)
-                  || elementType == typeof(UInt64)
-                  || elementType == typeof(float)
-                  || elementType == typeof(Double)
-                  || elementType == typeof(Decimal)
-                  || elementType == typeof(Boolean)
-                  || elementType == typeof(Char)
-                  || elementType.IsEnum
-                  )
-                    {
-                    }
-                    else
+                    if (!IsCommonType(elementType))
                     {
                         GenerateCode_ObjectToStringClass(sb, elementType);
                     }
@@ -138,9 +109,10 @@ namespace QuotV5
             }
             else
             {
+
                 foreach (var field in type.GetFields())
                 {
-                    if (!field.IsStatic && field.IsPublic && !field.FieldType.IsEnum && field.FieldType !=typeof(string))
+                    if (!field.IsStatic && field.IsPublic && !field.FieldType.IsEnum && field.FieldType != typeof(string))
                     {
                         GenerateCode_ObjectToStringClass(sb, field);
                     }
@@ -163,6 +135,7 @@ namespace QuotV5
             sb.AppendLine("}");//class end
         }
 
+
         private static void GenerateCode_ObjectToStringClass(StringBuilder sb, MemberInfo memberInfo)
         {
             Type memberType;
@@ -175,7 +148,7 @@ namespace QuotV5
 
             if (types.Contains(memberType))
                 return;
-           
+
             if (memberType.GetFields().Any(f => f.IsPublic && !f.IsStatic))
                 GenerateCode_ObjectToStringClass(sb, memberType);
             else if (memberType.GetProperties().Any(p => p.CanRead))
@@ -186,7 +159,7 @@ namespace QuotV5
 
         private static void GenerateCode_ObjectToStringMethord(StringBuilder sb, Type type)
         {
-            sb.AppendLine(string.Format("public static string ObjectToString({0} obj)", type.FullName.Replace("+", ".")));
+            sb.AppendLine(string.Format("public static string ObjectToString(global::{0} obj)", type.FullName.Replace("+", ".")));
             sb.AppendLine("{");//method start
 
             sb.AppendLine("StringBuilder sb=new StringBuilder();");
@@ -250,19 +223,7 @@ namespace QuotV5
                 sb.AppendLine(string.Format("else"));
                 sb.AppendLine(string.Format("sb.AppendLine();"));
             }
-            else if (
-                elementType == typeof(Int16)
-                || elementType == typeof(Int32)
-                || elementType == typeof(Int64)
-                || elementType == typeof(UInt16)
-                || elementType == typeof(UInt32)
-                || elementType == typeof(UInt64)
-                || elementType == typeof(float)
-                || elementType == typeof(Double)
-                || elementType == typeof(Decimal)
-                || elementType == typeof(Boolean)
-                || elementType == typeof(Char)
-                )
+            else if (IsCommonType(elementType))
             {
                 sb.AppendLine(string.Format("sb.AppendLine(item.ToString());"));
             }
@@ -302,19 +263,7 @@ namespace QuotV5
             {
                 sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", memberName));
             }
-            else if (
-                memberType == typeof(Int16)
-                || memberType == typeof(Int32)
-                || memberType == typeof(Int64)
-                || memberType == typeof(UInt16)
-                || memberType == typeof(UInt32)
-                || memberType == typeof(UInt64)
-                || memberType == typeof(float)
-                || memberType == typeof(Double)
-                || memberType == typeof(Decimal)
-                || memberType == typeof(Boolean)
-                || memberType == typeof(Char)
-                )
+            else if (IsCommonType(memberType))
             {
                 sb.AppendLine(string.Format("sb.AppendLine(string.Format(\"{0}={{0}}\",obj.{0}));", memberName));
             }
@@ -357,6 +306,32 @@ namespace QuotV5
             {
                 return type.FullName.Replace(".", "_").Replace("+", "__"); ;
             }
+        }
+
+
+        private static bool IsCommonType(Type type)
+        {
+            if (
+                   type == typeof(string)
+                  || type == typeof(Int16)
+                   || type == typeof(Int32)
+                   || type == typeof(Int64)
+                   || type == typeof(UInt16)
+                   || type == typeof(UInt32)
+                   || type == typeof(UInt64)
+                   || type == typeof(float)
+                   || type == typeof(Double)
+                   || type == typeof(Decimal)
+                   || type == typeof(Boolean)
+                   || type == typeof(Char)
+                   || type == typeof(DateTime)
+                   || type.IsEnum
+                   )
+            {
+                return true;
+            }
+            else
+                return false;
         }
         #endregion
 

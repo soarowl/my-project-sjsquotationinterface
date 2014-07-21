@@ -12,9 +12,10 @@
   </StaticInfoFiles>
 
   <BinaryConnections>
-    <BinaryConnection Key="Realtime" IP="172.16.100.99" Port="8016" TargetCompID="N4005Q0001" SenderCompID="realtime" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
-    <BinaryConnection Key="Resend" IP="172.16.100.99" Port="8017" TargetCompID="N4005Q0001" SenderCompID="resend" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
+    <BinaryConnection Key="StockRealtime" IP="172.16.1.99" Port="8016" TargetCompID="N4005Q0001" SenderCompID="realtime" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
+    <BinaryConnection Key="Resend" IP="172.16.1.99" Port="8017" TargetCompID="N4005Q0001" SenderCompID="resend" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
+    <BinaryConnection Key="OptionRealtime" IP="172.16.1.99" Port="7016" TargetCompID="N4005Q0001" SenderCompID="realtime" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
   </BinaryConnections>
 
-  <ActiveMQ Address="192.168.1.164:61616" RecordsPerPackage  ="1000" ></ActiveMQ>
+  <ActiveMQ Address="192.168.1.59:61616" RecordsPerPackage  ="100" ></ActiveMQ>
 </Configuration>
