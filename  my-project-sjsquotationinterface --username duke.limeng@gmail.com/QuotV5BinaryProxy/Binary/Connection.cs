@@ -588,17 +588,18 @@ namespace QuotV5.Binary
 
         private ConcurrentQueue<MessagePackEx> messageQueue = new ConcurrentQueue<MessagePackEx>();
 
+        private IMessagePackRecorder msgPackRecorder;
         /// <summary>
         /// 接收行情数据的线程
         /// </summary>
         protected Thread marketDataReceiveThread;
 
-  
 
-        public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper)
+
+        public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper, IMessagePackRecorder msgPackRecorder=null)
             : base(config, logHelper)
         {
-
+            this.msgPackRecorder = msgPackRecorder;
         }
 
 
@@ -702,7 +703,10 @@ namespace QuotV5.Binary
                 logMarketData(marketData);
                 RaiseEvent(marketData,now);
             }
-
+            if (this.msgPackRecorder != null)
+            {
+                this.msgPackRecorder.Record(new MessagePackEx(msg, now));
+            }
         }
 
 

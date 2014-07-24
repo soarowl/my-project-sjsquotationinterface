@@ -995,11 +995,11 @@ namespace MDS.Plugin.SZQuotV5
 
             if (securityInfo.CommonInfo.SecurityType == QuotV5.StaticInfo.SecurityType.股票期权)
             {
-                quotInfo.F_ProductClass = "SO";
+                quotInfo.F_productId= "SO";
             }
             else
             {
-                quotInfo.F_ProductClass = "EO";
+                quotInfo.F_productId = "EO";
             }
         }
 
@@ -1196,7 +1196,7 @@ namespace MDS.Plugin.SZQuotV5
 
         private Int64 DatetimeToLong(DateTime time)
         {
-            return (Int64)(time.Year * 1000000000000000) + (Int64)(time.Month * 100000000000) + (Int64)(time.Day * 1000000000) + (Int64)(time.Hour * 10000000) + (Int64)(time.Minute * 100000) + (Int64)(time.Second * 1000) + (Int64)time.Millisecond;
+            return (Int64)time.Year * 10000000000000 + (Int64)time.Month * 100000000000 + (Int64)time.Day * 1000000000 + (Int64)(time.Hour * 10000000) + (Int64)(time.Minute * 100000) + (Int64)(time.Second * 1000) + (Int64)time.Millisecond;
         }
 
         enum Status

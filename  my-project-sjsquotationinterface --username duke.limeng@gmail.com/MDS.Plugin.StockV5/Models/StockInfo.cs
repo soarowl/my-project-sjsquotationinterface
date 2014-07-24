@@ -7,10 +7,7 @@ namespace MDS.Plugin.SZQuotV5
 {
     public class StockInfo
     {
-        public StockInfo()
-        {
-            this.exchId = "1";
-        }
+      
         /// <summary>
         /// 市场代码
         /// </summary>

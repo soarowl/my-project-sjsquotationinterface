@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDServer", "MDServer\MDServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDS.Plugin.SZQuotV5", "MDS.Plugin.StockV5\MDS.Plugin.SZQuotV5.csproj", "{2F2FEA5B-034D-4AB6-9607-872601227804}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuotPlayer", "QuotPlayer\QuotPlayer.csproj", "{13EB738A-0190-4CE6-BF00-61237FF6DB89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,16 @@ Global
 		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{2F2FEA5B-034D-4AB6-9607-872601227804}.Release|x86.ActiveCfg = Release|Any CPU
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Debug|x86.ActiveCfg = Debug|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Debug|x86.Build.0 = Debug|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Release|Any CPU.ActiveCfg = Release|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Release|Mixed Platforms.Build.0 = Release|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Release|x86.ActiveCfg = Release|x86
+		{13EB738A-0190-4CE6-BF00-61237FF6DB89}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

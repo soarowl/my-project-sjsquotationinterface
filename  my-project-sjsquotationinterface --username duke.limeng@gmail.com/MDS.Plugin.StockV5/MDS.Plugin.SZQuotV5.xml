@@ -2,6 +2,7 @@
 <Configuration Namespace="MDS.Plugin.SZQuotV5">
   <Plugin Logger="SZQuotV5"></Plugin>
 
+  <!--静态行情文件配置-->
   <StaticInfoFiles>
     <StaticInfoFile Key="Securities"  Path="\\172.16.1.99\StaticInfo\securities_{YYYYMMDD}.xml" ScanInterval="0:1:0" />
     <StaticInfoFile Key="IndexInfo"  Path="\\172.16.1.99\StaticInfo\indexinfo_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
@@ -10,12 +11,13 @@
     <StaticInfoFile Key="NegotiationParams" Path="\\172.16.1.99\StaticInfo\negotiationparams_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
     <StaticInfoFile Key="SecurityCloseMD" Path="\\172.16.1.99\StaticInfo\securityclosemd_{YYYYMMDD}.xml" ScanInterval="0:1:0"/>
   </StaticInfoFiles>
-
+  <!--Binary行情网关连接配置-->
   <BinaryConnections>
     <BinaryConnection Key="StockRealtime" IP="172.16.1.99" Port="8016" TargetCompID="N4005Q0001" SenderCompID="realtime" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
     <BinaryConnection Key="Resend" IP="172.16.1.99" Port="8017" TargetCompID="N4005Q0001" SenderCompID="resend" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
     <BinaryConnection Key="OptionRealtime" IP="172.16.1.99" Port="7016" TargetCompID="N4005Q0001" SenderCompID="realtime" Password="" HeartbeatIntervalS="3" ConnectionTimeoutMS="6000" ReconnectIntervalMS="30000" />
   </BinaryConnections>
-
-  <ActiveMQ Address="192.168.1.59:61616" RecordsPerPackage  ="100" ></ActiveMQ>
+  <!--mq服务器地址-->
+  <!--RecordsPerPackage表示最多每多少条记录打到一个包中-->
+  <ActiveMQ Address="192.168.1.167:61616" RecordsPerPackage  ="100" ></ActiveMQ>
 </Configuration>

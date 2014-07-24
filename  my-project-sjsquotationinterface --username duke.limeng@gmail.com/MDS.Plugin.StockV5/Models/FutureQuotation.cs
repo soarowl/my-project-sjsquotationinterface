@@ -9,7 +9,7 @@ namespace MDS.Plugin.SZQuotV5
     {
         public FutureQuotation()
         {
-            this.exchId = "X";
+            this.exchId = "Y";
             this.upPercent = 0;
             this.downPercent = 0;
             this.qtyPerHand = 1;
@@ -18,6 +18,7 @@ namespace MDS.Plugin.SZQuotV5
             this.strikeStyle = "E";
             this.marginRate1 = 0;
             this.marginRate2 = 0;
+            this.stkOrderStatus = "TRD";
         }
 
 

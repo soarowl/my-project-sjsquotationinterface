@@ -19,9 +19,10 @@ namespace MDS.Plugin.SZQuotV5
 
         internal void ConstructQuotManager()
         {
+            MongoMessagePackRecorder recorder = new MongoMessagePackRecorder("192.168.1.167", 6678, this.logHelper);
 
-            QuotV5.Binary.RealTimeQuotConnection stockRealtimeQuotConn = ConstructRealTimeQuotConnection("StockRealtime");
-            QuotV5.Binary.RealTimeQuotConnection optionRealtimeQuotConn = ConstructRealTimeQuotConnection("OptionRealtime");
+            QuotV5.Binary.RealTimeQuotConnection stockRealtimeQuotConn = ConstructRealTimeQuotConnection("StockRealtime", recorder);
+            QuotV5.Binary.RealTimeQuotConnection optionRealtimeQuotConn = ConstructRealTimeQuotConnection("OptionRealtime", recorder);
             QuotationRepository quotRepository = new QuotationRepository();
 
 
@@ -53,8 +54,8 @@ namespace MDS.Plugin.SZQuotV5
             SecurityCloseMDProvider securityCloseMDProvider = new SecurityCloseMDProvider(securityCloseMDProviderConfig, this.logHelper);
 
             this.quotManager = new QuotationManager(
-               new QuotV5.Binary.RealTimeQuotConnection[] { optionRealtimeQuotConn },
-                // new QuotV5.Binary.RealTimeQuotConnection[] { stockRealtimeQuotConn, optionRealtimeQuotConn },
+               //new QuotV5.Binary.RealTimeQuotConnection[] { optionRealtimeQuotConn },
+                 new QuotV5.Binary.RealTimeQuotConnection[] { stockRealtimeQuotConn, optionRealtimeQuotConn },
                quotRepository,
                quotPublisher,
                 // null,
@@ -72,7 +73,7 @@ namespace MDS.Plugin.SZQuotV5
             this.quotSnapService = new QuotationSnapService(sc, quotPublisher, this.logHelper);
         }
 
-        private QuotV5.Binary.RealTimeQuotConnection ConstructRealTimeQuotConnection(string connConfigkey)
+        private QuotV5.Binary.RealTimeQuotConnection ConstructRealTimeQuotConnection(string connConfigkey,QuotV5.Binary.IMessagePackRecorder recorder=null)
         {
             var connConfig = PluginContext.Configuration.BinaryConnections.Connections.FirstOrDefault(c => c.Key == connConfigkey);
             if (connConfig == null)
@@ -90,7 +91,7 @@ namespace MDS.Plugin.SZQuotV5
                 Password = connConfig.Password
             };
 
-            QuotV5.Binary.RealTimeQuotConnection realtimeQuotConn = new QuotV5.Binary.RealTimeQuotConnection(realtimeConnConfig, this.logHelper);
+            QuotV5.Binary.RealTimeQuotConnection realtimeQuotConn = new QuotV5.Binary.RealTimeQuotConnection(realtimeConnConfig, this.logHelper, recorder);
             return realtimeQuotConn;
         }
 

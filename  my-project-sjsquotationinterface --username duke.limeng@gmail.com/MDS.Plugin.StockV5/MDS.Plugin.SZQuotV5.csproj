@@ -40,6 +40,14 @@
     <Reference Include="Log4cb">
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\Log4cb.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB.Bson, Version=0.0.0.0, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\QuotV5BinaryProxy\Libs\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=0.0.0.0, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\QuotV5BinaryProxy\Libs\MongoDB.Driver.dll</HintPath>
+    </Reference>
     <Reference Include="ServiceHost">
       <HintPath>..\..\..\..\..\..\..\Dev\CubeCubic_New\Main\Framework\Core\Bins\Release\ServiceHost.dll</HintPath>
     </Reference>
@@ -75,6 +83,7 @@
     <Compile Include="Models\FutureQuotation.cs" />
     <Compile Include="Models\StockQuotation.cs" />
     <Compile Include="Models\StockInfo.cs" />
+    <Compile Include="DebugTools\MongoMessagePackRecorder.cs" />
     <Compile Include="MQPublisher\MQConnConfig.cs" />
     <Compile Include="MQPublisher\MQConsumer.cs" />
     <Compile Include="MQPublisher\MQMsgType.cs" />

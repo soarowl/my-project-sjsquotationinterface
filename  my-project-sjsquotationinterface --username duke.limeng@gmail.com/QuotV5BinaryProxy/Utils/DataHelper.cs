@@ -5,7 +5,7 @@ using System.Text;
 
 namespace QuotV5
 {
-    class DataHelper
+    public class DataHelper
     {
 
         public static byte[] UnionByteArrays(params byte[][] byteArrays)
