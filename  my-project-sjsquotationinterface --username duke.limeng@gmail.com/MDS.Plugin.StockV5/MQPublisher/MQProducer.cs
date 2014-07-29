@@ -156,7 +156,8 @@ namespace MDS.Plugin.SZQuotV5
             catch (Exception ex)
             {
                 this.logHelper.LogErrMsg(ex, "MQProducer发送消息异常");
-                throw;
+                msgId = string.Empty;
+                return false;
             }
         }
 
@@ -212,22 +213,26 @@ namespace MDS.Plugin.SZQuotV5
                 }
 
                 iTextMessage.Text = data;
-              
-                //发送超时时间,如果timeToLive == 0 则永远不过期
-                if (timeToLiveMS != 0)
-                {
-                    Producer.TimeToLive = TimeSpan.FromMilliseconds((double)timeToLiveMS);
-                }
 
+             
+               
                 //向MQ发送消息
-                Producer.Send(iTextMessage);
+                if (timeToLiveMS == 0)
+                {
+                    Producer.Send(iTextMessage);
+                }
+                else
+                {
+                    Producer.Send(iTextMessage, MsgDeliveryMode.NonPersistent, MsgPriority.Normal, TimeSpan.FromMilliseconds((double)timeToLiveMS));
+                }
                 msgId = iTextMessage.NMSMessageId;
                 return true;
             }
             catch (Exception ex)
             {
                 this.logHelper.LogErrMsg(ex, "MQProducer发送消息异常");
-                throw;
+                msgId = string.Empty;
+                return false;
             }
         }
 

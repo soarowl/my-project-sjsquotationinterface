@@ -19,5 +19,5 @@
   </BinaryConnections>
   <!--mq服务器地址-->
   <!--RecordsPerPackage表示最多每多少条记录打到一个包中-->
-  <ActiveMQ Address="192.168.1.167:61616" RecordsPerPackage  ="100" ></ActiveMQ>
+  <ActiveMQ Address="192.168.1.59:61616" RecordsPerPackage  ="100" ></ActiveMQ>
 </Configuration>

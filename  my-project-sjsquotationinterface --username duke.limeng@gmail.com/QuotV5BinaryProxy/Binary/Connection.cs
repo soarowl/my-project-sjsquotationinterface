@@ -435,7 +435,7 @@ namespace QuotV5.Binary
                     return null;
 
                 messageData = new MessagePack(headerBytes);
-                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1},threadId={2}", messageData.Header.Type, messageData.Header.BodyLength, Thread.CurrentThread.ManagedThreadId);
+                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1},threadId={2},Port={3}", messageData.Header.Type, messageData.Header.BodyLength, Thread.CurrentThread.ManagedThreadId,this.config.Port);
 
                 //if (!Enum.IsDefined(typeof(MsgType), (int)messageData.Header.Type))
                 //    return null;

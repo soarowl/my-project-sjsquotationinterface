@@ -55,10 +55,12 @@ namespace V5Test
 
           }
      static   List<MDS.Plugin.SZQuotV5.StockQuotation> quot;
+     static MDS.Plugin.SZQuotV5.StockQuotation q1;
         private static void getSnap()
         {
             MDS.Plugin.SZQuotV5.QuotationRepository re = new MDS.Plugin.SZQuotV5.QuotationRepository();
           quot=  re.GetAllStockQuotation();
+          q1 = quot.Where(q => q.stkId == "000001").FirstOrDefault();
         }
 
         private static void testMQProducer()
@@ -69,10 +71,10 @@ namespace V5Test
             var properties = new Dictionary<string, object>();
             properties["clientId"] = "test1";
             string msgId;
-            bool succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_StkInfo", string.Empty, properties, 2000, out msgId);
+            bool succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_StkInfo", string.Empty, properties, 1000, out msgId);
             Console.WriteLine(string.Format("SZ5_REQ_StkInfo succeed={1},msgId={0}", msgId, succeed));
 
-            succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_Quotation", string.Empty, properties, 2000, out msgId);
+            succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_Quotation", string.Empty, properties, 1000, out msgId);
             Console.WriteLine(string.Format("SZ5_REQ_Quotation succeed={1},msgId={0}", msgId, succeed));
             //MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.164:61616" };
             //MDS.Plugin.SZQuotV5.MQProducer producer = new MDS.Plugin.SZQuotV5.MQProducer(cfg, logHelper);

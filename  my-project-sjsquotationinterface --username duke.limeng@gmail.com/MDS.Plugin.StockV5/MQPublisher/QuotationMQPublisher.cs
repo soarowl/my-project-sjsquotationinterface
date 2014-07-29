@@ -147,19 +147,19 @@ namespace MDS.Plugin.SZQuotV5
                 var subList = data.Skip(index).Take(this.config.RecordsPerPackage).ToList();
                 // var dataBytes = JsonSerializer.ObjectToBytes<List<T>>(subList);
                 var dataStr = JsonSerializer.ObjectToString<List<T>>(subList);
-                bool succeed = this.mqProducer.SendMsg(msgType, topic, dataStr, properties, 2000, out msgId);
+                bool succeed = this.mqProducer.SendMsg(msgType, topic, dataStr, properties, 1000, out msgId);
                 if (succeed)
                 {
-                    this.logHelper.LogInfoMsg("向MQ发送数据成功，MsgId={0},数据类型={1},数量={2}", msgId, typeof(T).Name, subList.Count);
+                    this.logHelper.LogInfoMsg("向MQ发送数据成功，MsgId={0},数据类型={1},数量={2},数据：\r\n{3}", msgId, typeof(T).Name, subList.Count,dataStr);
                 }
                 else
                 {
-                    this.logHelper.LogInfoMsg("向MQ发送数据失败，MsgId={0},数据类型={1},数量={2}", msgId, typeof(T).Name, subList.Count);
+                    this.logHelper.LogInfoMsg("向MQ发送数据失败，MsgId={0},数据类型={1},数量={2},数据：\r\n{3}", msgId, typeof(T).Name, subList.Count, dataStr);
                 }
             }
             properties["refreshSignal"] = "Finish";
 
-            bool s = this.mqProducer.SendMsg(msgType, topic, string.Empty, properties, 2000, out msgId);
+            bool s = this.mqProducer.SendMsg(msgType, topic, string.Empty, properties, 1000, out msgId);
             this.logHelper.LogInfoMsg("向MQ发送数据结束消息，MsgId={0},数据类型={1},Succeed={2}", msgId, typeof(T).Name, s);
 
         }
