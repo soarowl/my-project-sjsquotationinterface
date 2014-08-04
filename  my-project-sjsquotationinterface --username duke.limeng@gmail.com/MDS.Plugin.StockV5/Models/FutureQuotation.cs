@@ -386,7 +386,7 @@ namespace MDS.Plugin.SZQuotV5
         /// <summary>
         /// 做市商标志
         /// </summary>
-        public bool marketMakerFlag { get; set; }
+        public bool marketMarkerFlag { get; set; }
 
 
 

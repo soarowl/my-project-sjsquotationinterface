@@ -28,7 +28,7 @@ namespace MDS.Plugin.SZQuotV5
         public void Enqueue(IEnumerable<StockInfo> stockInfos, bool isRealtimeQuotation, string clientId = null)
         {
             EnqueueData(stockInfos.ToList(), isRealtimeQuotation, clientId);
-        }
+           }
 
         public void Enqueue(StockQuotation quotInfo, bool isRealtimeQuotation, string clientId = null)
         {
@@ -54,7 +54,7 @@ namespace MDS.Plugin.SZQuotV5
         {
             if (marketData == null)
                 return;
-            var msg = new Msg() { ClientId = clientId, Data = marketData };
+            var msg = new Msg() { ClientId = clientId, Data = marketData,ID=Guid.NewGuid() };
             if (isRealtimeQuotation)
             {
                 msg.MsgType = MQMsgType.TOPIC;
@@ -63,9 +63,17 @@ namespace MDS.Plugin.SZQuotV5
             else
             {
                 msg.MsgType = MQMsgType.QUEUE;
-                msg.Topic = "SZ5_Quotation_Image";
+                if (marketData is StockInfo || marketData is List<StockInfo>)
+                {
+                    msg.Topic = "SZ5_StkInfo_Image";
+                }
+                else
+                {
+                    msg.Topic = "SZ5_Quotation_Image";
+                }
             }
             msgQueue.Enqueue(msg);
+            this.logHelper.LogDebugMsg("加入发布队列,clientId={0},MsgID={1}", clientId,msg.ID);
             this.newDataEvent.Set();
         
         }
@@ -105,10 +113,11 @@ namespace MDS.Plugin.SZQuotV5
             Msg msg;
             if (this.msgQueue.TryDequeue(out msg))
             {
+                this.logHelper.LogDebugMsg("开始处理发布队列中的消息,MsgID={0}",  msg.ID);
                 if (msg.Data is List<StockInfo>)
-                    Publish<StockInfo>(msg.Data as List<StockInfo>, msg.ClientId, msg.MsgType, msg.Topic,"STK");
+                    Publish<StockInfo>(msg.Data as List<StockInfo>, msg.ClientId, msg.MsgType, msg.Topic,"STK",true);
                 else if (msg.Data is List<StockQuotation>)
-                    Publish<StockQuotation>(msg.Data as List<StockQuotation>, msg.ClientId, msg.MsgType, msg.Topic, "STK");
+                    Publish<StockQuotation>(msg.Data as List<StockQuotation>, msg.ClientId, msg.MsgType, msg.Topic, "STK",true);
                 else if (msg.Data is StockInfo)
                 {
                     List<StockInfo> stockList = new List<StockInfo>() { msg.Data as StockInfo };
@@ -126,8 +135,9 @@ namespace MDS.Plugin.SZQuotV5
                 }
                 else if (msg.Data is List<FutureQuotation>)
                 {
-                    Publish<FutureQuotation>(msg.Data as List<FutureQuotation>, msg.ClientId, msg.MsgType, msg.Topic, "FUT");
+                    Publish<FutureQuotation>(msg.Data as List<FutureQuotation>, msg.ClientId, msg.MsgType, msg.Topic, "FUT",true);
                 }
+                this.logHelper.LogDebugMsg("完成处理发布队列中的消息,MsgID={0}", msg.ID);
             }
         }
 
@@ -150,18 +160,19 @@ namespace MDS.Plugin.SZQuotV5
                 bool succeed = this.mqProducer.SendMsg(msgType, topic, dataStr, properties, 1000, out msgId);
                 if (succeed)
                 {
-                    this.logHelper.LogInfoMsg("向MQ发送数据成功，MsgId={0},数据类型={1},数量={2},数据：\r\n{3}", msgId, typeof(T).Name, subList.Count,dataStr);
+                    this.logHelper.LogInfoMsg("向MQ发送数据成功，clientId={4},topic={5},refreshType={6}，MsgId={0},数据类型={1},数量={2},数据：\r\n{3}", msgId, typeof(T).Name, subList.Count, dataStr, clientId, topic,refreshType);
                 }
                 else
                 {
-                    this.logHelper.LogInfoMsg("向MQ发送数据失败，MsgId={0},数据类型={1},数量={2},数据：\r\n{3}", msgId, typeof(T).Name, subList.Count, dataStr);
+                    this.logHelper.LogInfoMsg("向MQ发送数据失败，clientId={4},topic={5},refreshType={6}，MsgId={0},数据类型={1},数量={2},数据：\r\n{3}", msgId, typeof(T).Name, subList.Count, dataStr, clientId, topic,refreshType);
                 }
             }
-            properties["refreshSignal"] = "Finish";
-
-            bool s = this.mqProducer.SendMsg(msgType, topic, string.Empty, properties, 1000, out msgId);
-            this.logHelper.LogInfoMsg("向MQ发送数据结束消息，MsgId={0},数据类型={1},Succeed={2}", msgId, typeof(T).Name, s);
-
+            if (sendFinishMsg)
+            {
+                properties["refreshSignal"] = "Finish";
+                bool s = this.mqProducer.SendMsg(msgType, topic, string.Empty, properties, 1000, out msgId);
+                this.logHelper.LogInfoMsg("向MQ发送数据结束消息，MsgId={0},数据类型={1},Succeed={2}", msgId, typeof(T).Name, s);
+            }
         }
 
         class Msg
@@ -170,6 +181,7 @@ namespace MDS.Plugin.SZQuotV5
             public object Data { get; set; }
             public MQMsgType MsgType { get; set; }
             public string Topic { get; set; }
+            public Guid ID { get; set; }
         }
 
 

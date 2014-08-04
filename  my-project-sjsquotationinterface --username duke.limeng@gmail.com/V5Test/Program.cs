@@ -14,14 +14,15 @@ namespace V5Test
         static Log4cb.ILog4cbHelper logHelper = new Log4cb.Log4cbHelper("V5");
         static void Main(string[] args)
         {
-            init();
-            getSnap();
+            testMQProducer();
+            //init();
+           // getSnap();
             //testMQConsumer2();
            // Thread.Sleep(3000);
             // testMQProducer();
             //testObjToString();
             // testRealtimeQuotConn();
-            // testStaticInfo_Index();
+          //   testStaticInfo_Index();
             // testStaticInfo_Security();
             //  testStaticInfo_CashAuctionParams();
             //testStaticInfo_DerivativeAuctionParams();
@@ -65,11 +66,12 @@ namespace V5Test
 
         private static void testMQProducer()
         {
-            MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.195:61616" };
+            MDS.Plugin.SZQuotV5.MQConnConfig cfg = new MDS.Plugin.SZQuotV5.MQConnConfig() { Address = "192.168.1.59:61616" };
             MDS.Plugin.SZQuotV5.MQProducer mp = new MDS.Plugin.SZQuotV5.MQProducer(cfg, logHelper);
             mp.StartMQ();
             var properties = new Dictionary<string, object>();
-            properties["clientId"] = "test1";
+            properties["clientId"] = "clientId=192.168.1.167_7000";
+            properties["refreshType"] = "STK";
             string msgId;
             bool succeed = mp.SendMsg(MDS.Plugin.SZQuotV5.MQMsgType.QUEUE, "SZ5_REQ_StkInfo", string.Empty, properties, 1000, out msgId);
             Console.WriteLine(string.Format("SZ5_REQ_StkInfo succeed={1},msgId={0}", msgId, succeed));
@@ -252,14 +254,15 @@ namespace V5Test
             CodeTimer.CodeTimer.Time("ParseSecurity", 10, () => { var ss = parser.Parse(fileContent); });
 
         }
+       static  List<QuotV5.StaticInfo.IndexInfo> securities;
         private static void testStaticInfo_Index()
         {
-            string securityFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Samples/indexinfo_20140121.xml");
+            string securityFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"C:\Users\limeng\Desktop\indexinfo_20140731.xml");
             string fileContent = File.ReadAllText(securityFile, Encoding.UTF8);
             CodeTimer.CodeTimer.Initialize();
             QuotV5.StaticInfo.IndexInfoParser parser = new QuotV5.StaticInfo.IndexInfoParser();
-            var securities = parser.Parse(fileContent);
-            CodeTimer.CodeTimer.Time("ParseIndex", 10, () => { var ss = parser.Parse(fileContent); });
+             securities = parser.Parse(fileContent);
+            //CodeTimer.CodeTimer.Time("ParseIndex", 10, () => { var ss = parser.Parse(fileContent); });
 
         }
         private static void testStaticInfo_NegotiationParamsParser()

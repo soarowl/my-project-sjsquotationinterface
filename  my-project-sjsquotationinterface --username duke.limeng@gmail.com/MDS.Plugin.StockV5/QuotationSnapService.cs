@@ -40,7 +40,7 @@ namespace MDS.Plugin.SZQuotV5
         {
             if (properties != null && properties.ContainsKey("clientId") && properties.ContainsKey("refreshType"))
             {
-                this.logHelper.LogInfoMsg("收到SZ5_REQ_StkInfo请求，clientId={0}，refreshType={1}", properties["clientId"], properties["refreshType"]);
+                this.logHelper.LogInfoMsg("收到SZ5_REQ_Quotation请求，clientId={0}，refreshType={1}", properties["clientId"], properties["refreshType"]);
                 if ((properties["refreshType"] as string) == "FUT")
                 {
                     PublishFutureQuotSnap(properties["clientId"] as string);
@@ -62,11 +62,11 @@ namespace MDS.Plugin.SZQuotV5
             {
                 this.logHelper.LogInfoMsg("收到SZ5_REQ_StkInfo请求，clientId={0}，refreshType={1}", properties["clientId"], properties["refreshType"]);
 
-                if (properties["refreshType"] == "FUT")
+                if ((properties["refreshType"] as string) == "FUT")
                 {
                     PublishFutureQuotSnap(properties["clientId"] as string);
                 }
-                else if (properties["refreshType"] == "STK")
+                else if ((properties["refreshType"] as string) == "STK")
                 {
                     PublishStockSnap(properties["clientId"] as string);
                 }

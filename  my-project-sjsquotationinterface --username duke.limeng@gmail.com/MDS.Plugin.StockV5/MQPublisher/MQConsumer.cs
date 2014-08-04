@@ -71,11 +71,11 @@ namespace MDS.Plugin.SZQuotV5
                         connection.Start();
                     this.stopEvent.Reset();
                     StartMsgProcessThread();
-                    this.logHelper.LogInfoMsg("MQConsumer启动成功");
+                    this.logHelper.LogInfoMsg("MQConsumer启动成功,Address={0}", this.config.Address);
                 }
                 catch (Exception ex)
                 {
-                    this.logHelper.LogErrMsg(ex, "MQConsumer启动异常}");
+                    this.logHelper.LogErrMsg(ex, "MQConsumer启动异常,Address={0}", this.config.Address);
                     throw ex;
                 }
             }

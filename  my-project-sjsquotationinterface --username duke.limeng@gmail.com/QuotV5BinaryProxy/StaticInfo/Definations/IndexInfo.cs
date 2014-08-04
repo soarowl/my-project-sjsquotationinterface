@@ -41,7 +41,7 @@ namespace QuotV5.StaticInfo
         /// <remarks>
         /// N18(5)
         /// </remarks>
-        public decimal PreCloseIdx { get; set; }
+        public decimal PrevCloseIdx { get; set; }
 
     }
 }

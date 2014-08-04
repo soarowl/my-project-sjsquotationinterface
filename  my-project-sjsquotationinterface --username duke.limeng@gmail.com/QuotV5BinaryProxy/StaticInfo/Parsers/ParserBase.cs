@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.Reflection;
 using System.Collections;
+using System.Xml;
 
 namespace QuotV5.StaticInfo
 {
@@ -245,6 +246,9 @@ namespace QuotV5.StaticInfo
     {
         public List<TReturn> Parse(string xmlContent)
         {
+            int i=xmlContent .IndexOf ("<");
+            if (i != 0)
+                xmlContent = xmlContent.Substring(i);
             XDocument xDoc = XDocument.Parse(xmlContent, LoadOptions.None);
             var parseInfo = XmlParseInfoAttribute.GetAttribute(typeof(TReturn));
             if (parseInfo != null)

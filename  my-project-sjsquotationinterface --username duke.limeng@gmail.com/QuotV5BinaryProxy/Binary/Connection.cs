@@ -243,6 +243,7 @@ namespace QuotV5.Binary
             newTcpClient.NoDelay = true;
             newTcpClient.ReceiveTimeout = milliSecondsTimeout;
             newTcpClient.SendTimeout = milliSecondsTimeout;
+            newTcpClient.Client.IOControl(IOControlCode.KeepAliveValues, KeepAlive(1, 10000, 3000), null);
             IAsyncResult result = null;
 
             try
@@ -273,8 +274,14 @@ namespace QuotV5.Binary
             }
         }
 
-
-
+        private byte[] KeepAlive(int onOff, int keepAliveTime, int keepAliveInterval)
+        {
+            byte[] buffer = new byte[12];
+            BitConverter.GetBytes(onOff).CopyTo(buffer, 0);
+            BitConverter.GetBytes(keepAliveTime).CopyTo(buffer, 4);
+            BitConverter.GetBytes(keepAliveInterval).CopyTo(buffer, 8);
+            return buffer;
+        }
         #region 登录
 
         protected bool Logon(out Logon logonAnswer)
@@ -435,7 +442,7 @@ namespace QuotV5.Binary
                     return null;
 
                 messageData = new MessagePack(headerBytes);
-                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1},threadId={2},Port={3}", messageData.Header.Type, messageData.Header.BodyLength, Thread.CurrentThread.ManagedThreadId,this.config.Port);
+                this.logHelper.LogInfoMsg("收到Message，msgType={0},BodyLength={1},threadId={2},Port={3}", messageData.Header.Type, messageData.Header.BodyLength, Thread.CurrentThread.ManagedThreadId, this.config.Port);
 
                 //if (!Enum.IsDefined(typeof(MsgType), (int)messageData.Header.Type))
                 //    return null;
@@ -596,7 +603,7 @@ namespace QuotV5.Binary
 
 
 
-        public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper, IMessagePackRecorder msgPackRecorder=null)
+        public RealTimeQuotConnection(ConnectionConfig config, Log4cb.ILog4cbHelper logHelper, IMessagePackRecorder msgPackRecorder = null)
             : base(config, logHelper)
         {
             this.msgPackRecorder = msgPackRecorder;
@@ -649,7 +656,7 @@ namespace QuotV5.Binary
                     break;
                 var msg = ReceiveMessage();
                 if (msg != null)
-                   // EnqueueMessage(msg);
+                    // EnqueueMessage(msg);
                     ProcessMessage(msg);
             }
 
@@ -701,7 +708,7 @@ namespace QuotV5.Binary
             if (marketData != null)
             {
                 logMarketData(marketData);
-                RaiseEvent(marketData,now);
+                RaiseEvent(marketData, now);
             }
             if (this.msgPackRecorder != null)
             {
@@ -717,11 +724,11 @@ namespace QuotV5.Binary
             logHelper.LogDebugMsg("收到数据：\r\n{0}", str);
         }
 
-        private void RaiseEvent(IMarketData marketData,DateTime receiveTime)
+        private void RaiseEvent(IMarketData marketData, DateTime receiveTime)
         {
             var handler = this.OnMarketDataReceived;
             if (handler != null)
-                handler(new MarketDataEx(marketData,receiveTime));
+                handler(new MarketDataEx(marketData, receiveTime));
         }
     }
 
@@ -762,7 +769,8 @@ namespace QuotV5.Binary
     }
     public class MarketDataEx : Tuple<IMarketData, DateTime>
     {
-        public MarketDataEx(IMarketData marketData, DateTime receiveTime):base(marketData,receiveTime)
+        public MarketDataEx(IMarketData marketData, DateTime receiveTime)
+            : base(marketData, receiveTime)
         { }
 
         public IMarketData MarketData { get { return this.Item1; } }

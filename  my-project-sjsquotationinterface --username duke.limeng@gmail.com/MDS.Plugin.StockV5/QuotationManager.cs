@@ -468,7 +468,7 @@ namespace MDS.Plugin.SZQuotV5
             stockInfo.stkId = securityInfo.SecurityID;
             stockInfo.stkName = securityInfo.Symbol;
             stockInfo.stkEnglishtAbbr = securityInfo.EnglishName;
-            stockInfo.closePrice = securityInfo.PreCloseIdx;
+            stockInfo.closePrice = securityInfo.PrevCloseIdx;
         }
 
         private void SetStockInfoProperty(StockInfo stockInfo, QuotV5.StaticInfo.CashAuctionParams cashAuctionParams)
@@ -477,7 +477,7 @@ namespace MDS.Plugin.SZQuotV5
             stockInfo.buyQtyUpperLimit = (int)cashAuctionParams.BuyQtyUpperLimit;
             stockInfo.sellQtyUpperLimit = (int)cashAuctionParams.SellQtyUpperLimit;
             stockInfo.orderPriceUnit = cashAuctionParams.PriceTick;
-            stockInfo.marketMakerFlag = cashAuctionParams.MarketMakerFlag;
+            stockInfo.marketMarkerFlag = cashAuctionParams.MarketMakerFlag;
         }
 
 
@@ -1019,12 +1019,12 @@ namespace MDS.Plugin.SZQuotV5
             quotInfo.orderPriceUnit = derivativeAuctionParams.PriceTick;
             quotInfo.maxOrderPrice = derivativeAuctionParams.RisePrice;
             quotInfo.minOrderPrice = derivativeAuctionParams.FallPrice;
-            quotInfo.marketMakerFlag = derivativeAuctionParams.MarketMakerFlag;
+            quotInfo.marketMarkerFlag = derivativeAuctionParams.MarketMakerFlag;
             quotInfo.currMargin = derivativeAuctionParams.SellMargin;
             quotInfo.minBuyQtyTimes = (int)derivativeAuctionParams.BuyQtyUnit;
             quotInfo.minSellQtyTimes = (int)derivativeAuctionParams.SellQtyUnit;
             quotInfo.preCurrMargin = derivativeAuctionParams.LastSellMargin;
-            quotInfo.marketMakerFlag = derivativeAuctionParams.MarketMakerFlag;
+            quotInfo.marketMarkerFlag = derivativeAuctionParams.MarketMakerFlag;
         }
 
 
