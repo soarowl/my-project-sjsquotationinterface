@@ -1019,12 +1019,12 @@ namespace MDS.Plugin.SZQuotV5
             quotInfo.orderPriceUnit = derivativeAuctionParams.PriceTick;
             quotInfo.maxOrderPrice = derivativeAuctionParams.RisePrice;
             quotInfo.minOrderPrice = derivativeAuctionParams.FallPrice;
-            quotInfo.marketMarkerFlag = derivativeAuctionParams.MarketMakerFlag;
+            quotInfo.marketMakerFlag = derivativeAuctionParams.MarketMakerFlag;
             quotInfo.currMargin = derivativeAuctionParams.SellMargin;
             quotInfo.minBuyQtyTimes = (int)derivativeAuctionParams.BuyQtyUnit;
             quotInfo.minSellQtyTimes = (int)derivativeAuctionParams.SellQtyUnit;
             quotInfo.preCurrMargin = derivativeAuctionParams.LastSellMargin;
-            quotInfo.marketMarkerFlag = derivativeAuctionParams.MarketMakerFlag;
+            quotInfo.marketMakerFlag = derivativeAuctionParams.MarketMakerFlag;
         }
 
 
